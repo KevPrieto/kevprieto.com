@@ -1,10 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { Section } from "./Section";
 import { Reveal, StaggerContainer, StaggerItem } from "./motion";
-import { useMotion } from "./motion";
 
 const logos: Record<string, string> = {
   java: "/logos/java.svg",
@@ -31,6 +29,9 @@ const logos: Record<string, string> = {
   postman: "/logos/postman.svg",
   openai: "/logos/openai.svg",
   claude: "/logos/claude.svg",
+  vercel: "/logos/vercel.svg",
+  "android-studio": "/logos/android-studio.svg",
+  unity: "/logos/unity.svg",
 };
 
 const toolCategories = {
@@ -52,10 +53,11 @@ const toolCategories = {
       ],
     },
     {
-      label: "Scripting & Automation",
+      label: "Mobile Development",
       tools: [
-        { name: "Bash", logo: "bash" },
-        { name: "Python", logo: "python" },
+        { name: "Android Studio", logo: "android-studio" },
+        { name: "Kotlin", logo: "kotlin" },
+        { name: "Swift", logo: "swift" },
       ],
     },
     {
@@ -68,15 +70,14 @@ const toolCategories = {
         { name: "Python", logo: "python" },
         { name: "C#", logo: "csharp" },
         { name: "Kotlin", logo: "kotlin" },
-        { name: "Swift", logo: "swift" },
       ],
     },
     {
-      label: "DevOps / Terminals",
+      label: "Deployment & Hosting",
       tools: [
-        { name: "Bash", logo: "bash" },
-        { name: "cmd", logo: "windows-terminal" },
-        { name: "PowerShell", logo: "powershell" },
+        { name: "Vercel", logo: "vercel" },
+        { name: "GitHub", logo: "github" },
+        { name: "GitLab", logo: "gitlab" },
       ],
     },
     {
@@ -84,16 +85,15 @@ const toolCategories = {
       tools: [
         { name: "Git", logo: "git" },
         { name: "GitHub", logo: "github" },
-        { name: "GitLab", logo: "gitlab" },
       ],
     },
   ],
   supporting: [
     {
-      label: "Data / Analytics",
+      label: "Game Development",
       tools: [
-        { name: "Power BI", logo: "powerbi" },
-        { name: "Excel", logo: "excel" },
+        { name: "Unity", logo: "unity" },
+        { name: "C#", logo: "csharp" },
       ],
     },
     {
@@ -121,7 +121,6 @@ interface ToolItemProps {
 }
 
 function ToolItem({ name, logo, size = "md" }: ToolItemProps) {
-  const { shouldReduceMotion } = useMotion();
   const containerSizes = {
     lg: "w-16 h-16",
     md: "w-12 h-12",
@@ -137,22 +136,10 @@ function ToolItem({ name, logo, size = "md" }: ToolItemProps) {
   const logoSrc = logos[logo];
 
   return (
-    <motion.div
-      className="group flex flex-col items-center gap-3"
-      whileHover={shouldReduceMotion ? {} : { y: -2, transition: { duration: 0.2 } }}
-    >
-      <motion.div
-        className={`${containerSizes[size]} rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center transition-colors duration-200`}
+    <div className="group flex flex-col items-center gap-3">
+      <div
+        className={`${containerSizes[size]} rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-center transition-all duration-200 group-hover:border-[var(--color-accent)]/40 group-hover:bg-[var(--color-surface)]`}
         style={{ boxShadow: "var(--shadow-soft)" }}
-        whileHover={
-          shouldReduceMotion
-            ? {}
-            : {
-                borderColor: "rgba(124, 58, 237, 0.4)",
-                backgroundColor: "var(--color-surface)",
-                transition: { duration: 0.2 },
-              }
-        }
       >
         {logoSrc && (
           <Image
@@ -163,11 +150,11 @@ function ToolItem({ name, logo, size = "md" }: ToolItemProps) {
             className="object-contain"
           />
         )}
-      </motion.div>
+      </div>
       <span className="text-[var(--font-size-xs)] text-[var(--color-muted-light)] text-center leading-tight max-w-[80px]">
         {name}
       </span>
-    </motion.div>
+    </div>
   );
 }
 
