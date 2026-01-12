@@ -34,7 +34,7 @@ export function Hero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setGreetingIndex((prev) => (prev + 1) % greetings.length);
-    }, 2800);
+    }, 4500);
     return () => clearInterval(interval);
   }, []);
 
@@ -115,14 +115,21 @@ export function Hero() {
             <AnimatePresence mode="wait">
               <motion.p
                 key={greetingIndex}
-                initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
+                initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-                className="text-[var(--font-size-4xl)] lg:text-[var(--font-size-5xl)] text-[var(--color-muted-light)] font-medium"
+                exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                className="
+                  text-sm 
+                  lg:text-base 
+                  tracking-wide 
+                  text-[var(--color-muted-light)] 
+                  opacity-70
+                "
               >
                 {greetings[greetingIndex]}
               </motion.p>
+
             </AnimatePresence>
           </div>
 
@@ -137,7 +144,10 @@ export function Hero() {
                     <br />
                     Driving{" "}
                     <span className="relative inline-block">
-                      <span className="text-[var(--color-accent)] text-glow">direction</span>
+                      <span className="text-primary opacity-80">
+                        direction
+                      </span>
+
                       <motion.svg
                         className="absolute -right-12 top-1/2 -translate-y-1/2 hidden lg:block"
                         width="40"
@@ -160,8 +170,8 @@ export function Hero() {
                         />
                       </motion.svg>
                     </span>
-                    .
                   </h1>
+
                 </Reveal>
                 <Reveal delay={0.2}>
                   <p className="text-[var(--font-size-lg)] text-[var(--color-muted-light)] leading-relaxed max-w-[28rem] mb-[var(--space-lg)]">
