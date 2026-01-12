@@ -2,121 +2,107 @@
 
 <img width="1146" height="879" alt="image" src="https://github.com/user-attachments/assets/fc3de048-9273-4f0e-ab81-9eac06726aa2" />
 
-Its purpose is to clearly communicate who I am, how I think, what I build  and the kind of systems I focus on.
+The site is meant to be a clear and honest snapshot of who I am as a developer:
+how I think, what I build, and the kind of systems I enjoy working on.
 
-## Professional intent
-
-This website is built with a clear priority order:
-
-1. **Getting noticed** by technical teams and recruiters
-2. **Presenting real projects** with architectural intent
-3. **Building a professional audience** through building in public
-4. **Providing a clean, professional contact channel**
+It’s not meant to impress.
+It’s meant to be understood.
 
 ---
 
-## Positioning
+## Why this site exists
 
-I am a software engineer with a backend-oriented mindset.
+I use this website as a professional reference point.
 
-I focus on:
+Its main goals are:
 
-- system design over surface-level features
-- clarity over cleverness
-- maintainability over novelty
-- shipping working products over demos
+1. To help technical teams and recruiters quickly understand my profile
+2. To present real projects and the ideas behind them
+3. To share what I’m building and learning in public
+4. To offer a simple and professional way to get in touch
 
-The site reflects the same principles I apply to software:
-intentional structure, minimal abstraction, and long-term thinking.
-
----
-
-## Technology stack (intentional by design)
-
-The stack is intentionally conservative, explicit, and industry-aligned:
-
-- **Framework:** Next.js (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI primitives:** shadcn/ui (used selectively, no heavy UI kits)
-- **Motion:** Framer Motion (subtle, optional, reduced-motion aware)
-- **Scrolling:** Lenis
-- **Hosting:** Vercel
-
-There is **no traditional backend**.
-
-### Backend rationale
-
-This site does not require:
-- user accounts
-- business logic
-- stateful workflows
-- databases
-- background jobs
-
-Adding a backend would introduce complexity without value.
-
-The only server-side logic is a minimal serverless function used to send emails from the contact form.
-
-This decision is intentional:
-- reduced maintenance
-- reduced attack surface
-- reduced cognitive overhead
-- higher signal-to-noise ratio
+Nothing here is optimized for marketing or lead capture.
+Clarity comes first.
 
 ---
 
-## Content philosophy
+## How I approach software
 
-- English only
-- Static, version-controlled content
-- No trackers by default
-- No cookies unless strictly required
-- No vanity analytics
-- No marketing copy
+I’m a software engineer with a backend-oriented mindset.
 
-If something is on the site, it has a reason to be there.
+I care most about:
+- designing systems that are easy to reason about
+- writing code that can be maintained over time
+- choosing simple solutions when they are enough
+- shipping working products, not just prototypes
+
+The website follows the same principles:
+clear structure, minimal abstraction, and intentional decisions.
+
+---
+
+## Technology choices
+
+The stack is intentionally simple and widely used:
+
+- **Next.js (App Router)** for structure and rendering
+- **TypeScript** for safety and clarity
+- **Tailwind CSS** for consistent styling
+- **shadcn/ui** for accessible UI primitives when needed
+- **Framer Motion** for subtle, optional animations
+- **Vercel** for hosting and deployment
+
+There is no traditional backend.
+
+For this project, a backend would add complexity without real benefit.
+The only server-side logic is a small serverless function used to send emails from the contact form.
+
+---
+
+## Content and privacy
+
+- Content is static and version-controlled
+- The site is written in English
+- No tracking by default
+- No cookies unless strictly necessary
+- No analytics focused on vanity metrics
+
+If something is on the site, it’s there for a reason.
 
 ---
 
 ## Projects
 
-The site highlights **real systems**, not experiments.
+The site focuses on real projects rather than experiments.
 
-### Flagship project: EYLA
-
-EYLA is a long-term system focused on:
-- roadmap orientation instead of task lists
-- deterministic structure instead of AI-driven ambiguity
+The main long-term project is **EYLA**, a system built around:
+- structured roadmaps instead of simple task lists
+- deterministic behavior instead of opaque automation
 - preserving user intent over time
-- clean architecture and backend-first thinking
+- clean architecture and backend-first design
 
-Other projects include:
-- Java desktop applications
-- backend system design work
-- automation and data tooling
-- structured game development projects
+Other projects include Java applications, backend-focused systems,
+automation tools, and structured game development work.
 
-Each project exists to demonstrate how I think, not just what I can build.
+Each project exists to show how I approach problems, not just the final result.
 
 ---
 
-## Accessibility & quality standards
+## Accessibility and quality
 
-Basic quality is non-negotiable:
+I try to keep basic quality standards consistent:
 
 - semantic HTML
-- correct button and link usage
+- correct use of buttons and links
 - labeled form inputs
-- keyboard navigation
+- keyboard-friendly navigation
 - reduced-motion support
 
-Animations are never required to understand content.
-Motion exists to support perception, not to attract attention.
+Animations are subtle and never required to understand the content.
 
 ---
 
-## Local development
+## Running the site locally
 
 ```bash
 npm install
