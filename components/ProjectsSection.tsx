@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Section } from "./Section";
-import { Reveal, StaggerContainer, StaggerItem } from "./motion";
+import { Reveal, StaggerContainer, StaggerItem, WordReveal } from "./motion";
 import { useMotion } from "./motion";
 
 type Project = {
@@ -90,7 +90,9 @@ function ProjectCard({ project }: { project: Project }) {
       </motion.div>
 
       <h3 className="text-[var(--font-size-xl)] font-bold mb-[var(--space-xs)]">
-        {project.title}
+        <WordReveal stagger={0.05} delay={0.1}>
+          {project.title}
+        </WordReveal>
       </h3>
 
       <p className="text-[var(--font-size-sm)] text-[var(--color-muted-light)] mb-[var(--space-md)] flex-1">

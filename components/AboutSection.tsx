@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Section } from "./Section";
-import { Reveal, StaggerContainer, StaggerItem } from "./motion";
+import { Reveal, WordReveal } from "./motion";
 import { useMotion } from "./motion";
 
 export function AboutSection() {
@@ -13,94 +13,73 @@ export function AboutSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-[var(--space-xl)]">
         {/* Text Column */}
         <Reveal>
-          <div className="space-y-[var(--space-md)]">
-            <p className="text-[var(--font-size-lg)] leading-relaxed">
-              I&apos;m a software engineer with a backend-oriented mindset, focused on
-              building systems that prioritize clarity, structure, and long-term
-              maintainability. I care less about shipping features quickly and more
-              about designing foundations that don&apos;t collapse under their own
-              complexity.
-            </p>
+          <div className="space-y-[var(--space-xl)]">
+            <motion.p
+              className="text-[clamp(1.5rem,3vw,2rem)] leading-relaxed"
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              viewport={{ once: true }}
+            >
+              <WordReveal stagger={0.05} delay={0}>
+                I build systems where structure matters.
+              </WordReveal>
+            </motion.p>
 
-            <p className="text-[var(--color-muted-light)] leading-relaxed">
-              My background spans backend development, automation, and data-driven
-              work, with a strong focus on Java, clean architecture, and testing.
-              Alongside professional experience, I actively build independent
-              systems like EYLA, where I explore how software can preserve intent,
-              continuity, and orientation over time instead of becoming disposable.
-            </p>
+            <motion.p
+              className="text-[clamp(1.125rem,2vw,1.5rem)] text-[var(--color-muted-light)] leading-relaxed"
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              viewport={{ once: true }}
+            >
+              My background is backend development, but my work goes beyond code:
+              I develop games, design interactive experiences, and explore how systems
+              behave when pushed to their limits.
+            </motion.p>
 
-            <p className="text-[var(--color-muted-light)] leading-relaxed">
-              I&apos;m particularly interested in how developers think, how systems age,
-              and how small architectural decisions compound over the long run. I
-              prefer explicit models, deterministic behavior, and tools that help
-              humans reason clearly about what they are building.
-            </p>
+            <motion.p
+              className="text-[clamp(1.125rem,2vw,1.5rem)] text-[var(--color-muted-light)] leading-relaxed"
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+              viewport={{ once: true }}
+            >
+              I also create content where I share tools, workflows, and technical ideas
+              across platforms like LinkedIn, Instagram, and YouTube.
+            </motion.p>
+
+            <motion.p
+              className="text-[clamp(1.25rem,2.5vw,1.75rem)] font-medium leading-relaxed"
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1, ease: [0.25, 0.1, 0.25, 1] }}
+              viewport={{ once: true }}
+            >
+              <WordReveal stagger={0.05} delay={0}>
+                Curiosity drives everything I build.
+              </WordReveal>
+            </motion.p>
           </div>
         </Reveal>
 
-        {/* Highlights Column */}
-        <StaggerContainer staggerDelay={0.15} className="space-y-[var(--space-md)]">
-          <StaggerItem>
-            <motion.div
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-[var(--space-lg)]"
-              style={{ boxShadow: "var(--shadow-soft)" }}
-              whileHover={
-                shouldReduceMotion
-                  ? {}
-                  : {
-                      y: -2,
-                      borderColor: "rgba(124, 58, 237, 0.3)",
-                      transition: { duration: 0.2 },
-                    }
-              }
-            >
-              <h3 className="text-[var(--font-size-lg)] font-bold mb-[var(--space-sm)]">
-                Focus Areas
-              </h3>
-              <ul className="space-y-2 text-[var(--color-muted-light)]">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]" />
-                  Backend systems and clean architecture
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-secondary)]" />
-                  State, continuity, and long-term system design
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]" />
-                  Testing, automation, and developer tooling
-                </li>
-              </ul>
-            </motion.div>
-          </StaggerItem>
-
-          <StaggerItem>
-            <motion.div
-              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-[var(--space-lg)]"
-              style={{ boxShadow: "var(--shadow-soft)" }}
-              whileHover={
-                shouldReduceMotion
-                  ? {}
-                  : {
-                      y: -2,
-                      borderColor: "rgba(124, 58, 237, 0.3)",
-                      transition: { duration: 0.2 },
-                    }
-              }
-            >
-              <h3 className="text-[var(--font-size-lg)] font-bold mb-[var(--space-sm)]">
-                Currently
-              </h3>
-              <p className="text-[var(--color-muted-light)] leading-relaxed">
-                Building EYLA as a long-term personal project while continuing to
-                deepen my backend engineering skills. Open to roles where I can work
-                on real systems, learn from strong engineers, and contribute to
-                codebases meant to last.
+        {/* Video Placeholder */}
+        <Reveal delay={0.3}>
+          <motion.div
+            className="relative aspect-video bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl overflow-hidden"
+            initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            viewport={{ once: true }}
+            style={{ boxShadow: "var(--shadow-soft)" }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-[var(--color-muted)] text-[var(--font-size-lg)] text-center px-8">
+                Video placeholder — setup & content creation
               </p>
-            </motion.div>
-          </StaggerItem>
-        </StaggerContainer>
+            </div>
+          </motion.div>
+        </Reveal>
       </div>
     </Section>
   );

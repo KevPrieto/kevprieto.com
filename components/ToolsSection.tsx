@@ -24,6 +24,7 @@ const logos: Record<string, string> = {
   git: "/logos/git.svg",
   github: "/logos/github.svg",
   gitlab: "/logos/gitlab.svg",
+  antigravity: "/logos/antigravity.svg",
   powerbi: "/logos/powerbi.svg",
   excel: "/logos/excel.svg",
   sonarqube: "/logos/sonarqube.svg",
@@ -122,11 +123,12 @@ const toolCategories = {
   auxiliary: {
     label: "AI Tools",
     tools: [
-      { name: "ChatGPT Pro", logo: "openai" },
-      { name: "Claude Pro", logo: "claude" },
+      { name: "ChatGPT", logo: "openai" },
+      { name: "Claude", logo: "claude" },
       { name: "GitHub Copilot", logo: "github-copilot" },
       { name: "Cursor", logo: "cursor" },
       { name: "OpenCode", logo: "opencode" },
+      { name: "Antigravity", logo: "antigravity" },
     ],
   },
 };
@@ -238,7 +240,7 @@ function CategoryGroup({ label, tools, variant = "standard" }: CategoryGroupProp
 export function ToolsSection() {
   return (
     <Section id="tools" title="Tools" subtitle="Technologies and platforms I work with">
-      <div className="space-y-[var(--space-2xl)]">
+      <div className="space-y-[var(--space-3xl)]">
         {/* Primary Category - Core Backend & JVM */}
         <Reveal>
           <CategoryGroup
