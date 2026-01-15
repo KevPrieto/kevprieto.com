@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Container } from "./Container";
-import { Reveal } from "./motion";
+import { Reveal, WordReveal } from "./motion";
 import { useMotion } from "./motion";
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -57,7 +57,9 @@ export function ContactSection() {
         <div className="max-w-[42rem] mx-auto text-center">
           <Reveal delay={0.1}>
             <h2 className="text-[var(--font-size-4xl)] font-bold mb-[var(--space-xl)] tracking-tight text-[var(--color-fg)]">
-              Or send a message
+              <WordReveal stagger={0.08} delay={0}>
+                Or send a message
+              </WordReveal>
             </h2>
           </Reveal>
         </div>

@@ -31,9 +31,9 @@ export function WhatIDoSection() {
           <Reveal delay={0.3}>
             <motion.p
               className="text-[clamp(1.75rem,4vw,3rem)] font-light leading-tight text-[var(--color-fg)] mb-[clamp(3rem,8vh,5rem)]"
-              initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: 1.2, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
               viewport={{ once: true }}
             >
               I make ideas real.
@@ -46,11 +46,11 @@ export function WhatIDoSection() {
               <motion.p
                 key={index}
                 className="text-[clamp(1.25rem,2.5vw,1.75rem)] text-[var(--color-muted-light)] leading-relaxed"
-                initial={shouldReduceMotion ? {} : { opacity: 0, y: 40 }}
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.9,
-                  delay: 0.6 + (index * 0.2),
+                  duration: 1,
+                  delay: 0.7 + (index * 0.25),
                   ease: [0.25, 0.1, 0.25, 1]
                 }}
                 viewport={{ once: true, amount: 0.3 }}

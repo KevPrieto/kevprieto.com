@@ -3,50 +3,58 @@
 import { motion } from "framer-motion";
 import { useMotion } from "./motion";
 
-interface FloatingCTAProps {
-  onClick: () => void;
-}
-
-export function FloatingCTA({ onClick }: FloatingCTAProps) {
+export function FloatingCTA() {
   const { shouldReduceMotion } = useMotion();
 
   return (
-    <motion.button
-      onClick={onClick}
-      className="fixed bottom-8 right-8 md:bottom-8 md:right-8 sm:bottom-6 sm:right-6 z-50 bg-[var(--color-surface)] text-[var(--color-fg)] border border-[var(--color-border)] px-6 py-3 sm:px-4 sm:py-2 rounded-full font-medium text-[var(--font-size-sm)] sm:text-[var(--font-size-xs)] inline-flex items-center gap-2 hover:text-[var(--color-accent)] transition-colors duration-200"
+    <motion.a
+      href="https://calendly.com/kgps1003/30min"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-8 right-8 md:bottom-10 md:right-10 z-50 group relative px-8 py-4 rounded-full bg-[var(--color-fg)] text-[var(--color-bg)] font-semibold text-[var(--font-size-lg)] border-2 border-[var(--color-accent)] inline-flex items-center gap-3 overflow-hidden"
       style={{ boxShadow: "var(--shadow-elevated)" }}
-      initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 1 }}
+      initial={shouldReduceMotion ? {} : { opacity: 0, y: 30, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.6, delay: 1, ease: [0.25, 0.1, 0.25, 1] }}
       whileHover={
         shouldReduceMotion
           ? {}
           : {
-              y: -2,
-              boxShadow: "0 6px 16px rgba(0, 0, 0, 0.12)",
-              transition: { duration: 0.2 },
+              y: -4,
+              scale: 1.02,
+              boxShadow: "0 8px 20px rgba(0, 122, 255, 0.3)",
+              transition: { duration: 0.3 },
             }
       }
       whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
       aria-label="Get in touch via Calendly"
     >
-      <span>Get in touch</span>
+      {/* iOS-style shine effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out pointer-events-none" />
+      
+      {/* Inner glow effect */}
+      <div className="absolute inset-0 rounded-full bg-[var(--color-accent)] opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none" />
+      
+      {/* Border glow effect */}
+      <div className="absolute inset-0 rounded-full border-2 border-[var(--color-accent)] opacity-50 group-hover:opacity-100 transition-opacity duration-300 animate-pulse pointer-events-none" />
+      
+      {/* Button content */}
+      <span className="relative z-10">Get in touch</span>
       <svg
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="transition-transform duration-200 group-hover:translate-x-0.5"
+        className="relative z-10 transition-transform duration-200 group-hover:translate-x-1"
       >
         <path
-          d="M6 3L11 8L6 13"
+          d="M7 17L17 7M17 7H7M17 7V17"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
-    </motion.button>
+    </motion.a>
   );
 }
