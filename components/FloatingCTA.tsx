@@ -11,7 +11,7 @@ export function FloatingCTA() {
       href="https://calendly.com/kgps1003/30min"
       target="_blank"
       rel="noopener noreferrer"
-      className="glass fixed top-2 right-2 sm:top-4 sm:right-4 z-[60] group px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-[var(--color-fg)] font-semibold text-[0.75rem] sm:text-[0.875rem] inline-flex items-center gap-1.5 sm:gap-2 overflow-hidden transition-all duration-300 pointer-events-auto"
+      className="glass fixed top-2 right-2 sm:top-4 sm:right-4 z-[60] group px-3 py-2 sm:px-4 sm:py-2.5 rounded-full text-[var(--color-fg)] font-semibold text-[0.75rem] sm:text-[0.875rem] items-center gap-1.5 sm:gap-2 overflow-hidden transition-all duration-300 pointer-events-auto hidden lg:inline-flex"
       style={{
         boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
       }}
