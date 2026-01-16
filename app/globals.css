@@ -118,6 +118,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Prevent horizontal overflow and zoom issues on mobile */
+html {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-fg);
@@ -125,6 +132,9 @@ body {
   font-size: var(--font-size-base);
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 h1, h2, h3, h4, h5, h6 {
