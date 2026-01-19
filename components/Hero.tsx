@@ -114,7 +114,7 @@ export function Hero() {
           <Reveal direction="down" delay={0}>
             <div className="flex justify-center mb-[var(--space-lg)]">
               <div className="glass flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse-ring" />
                 <span className="text-[0.8125rem] sm:text-[var(--font-size-xs)] font-medium text-[var(--color-fg)]">
                   Available for work
                   <span className="ellipsis-dot">.</span>

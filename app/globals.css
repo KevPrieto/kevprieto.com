@@ -147,13 +147,19 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: 1.1;
   font-weight: 700;
 }
 
 /* Form Styles */
-input, textarea {
+input,
+textarea {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
@@ -163,16 +169,18 @@ input, textarea {
   width: 100%;
   outline: none;
   transition: border-color var(--animation-duration) var(--animation-easing),
-              box-shadow var(--animation-duration) var(--animation-easing),
-              background-color 0.3s ease;
+    box-shadow var(--animation-duration) var(--animation-easing),
+    background-color 0.3s ease;
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--color-muted);
 }
 
@@ -182,6 +190,7 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: translateY(var(--animation-distance));
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -193,6 +202,7 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: translateY(calc(var(--animation-distance) * -1));
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -203,6 +213,7 @@ input::placeholder, textarea::placeholder {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -213,10 +224,32 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Animation Utilities */
@@ -247,8 +280,8 @@ input::placeholder, textarea::placeholder {
 
   .hover-lift {
     transition: transform var(--animation-duration) var(--animation-easing),
-                border-color var(--animation-duration) var(--animation-easing),
-                box-shadow var(--animation-duration) var(--animation-easing);
+      border-color var(--animation-duration) var(--animation-easing),
+      box-shadow var(--animation-duration) var(--animation-easing);
   }
 
   .hover-lift:hover {
@@ -285,6 +318,7 @@ input::placeholder, textarea::placeholder {
 
 /* Reduced motion - show content immediately */
 @media (prefers-reduced-motion: reduce) {
+
   .animate-fade-in-up,
   .animate-fade-in-down {
     opacity: 1;
@@ -308,13 +342,25 @@ input::placeholder, textarea::placeholder {
 }
 
 /* Stagger delays */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
 
 /* Lenis smooth scroll */
-html.lenis, html.lenis body {
+html.lenis,
+html.lenis body {
   height: auto;
 }
 
