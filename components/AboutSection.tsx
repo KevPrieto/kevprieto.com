@@ -73,7 +73,7 @@ export function AboutSection() {
         {/* Vertical Video Column - Large, Editorial, Premium */}
         <Reveal delay={0.2}>
           <motion.div
-            className="relative w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[520px] aspect-[9/16] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-3xl overflow-hidden mx-auto lg:mx-0 group"
+            className="relative w-[320px] sm:w-[380px] lg:w-[440px] aspect-[9/16] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-3xl overflow-hidden mx-auto lg:mx-0 group"
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 40, scale: 0.95 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -82,7 +82,7 @@ export function AboutSection() {
           >
             {/* Loading skeleton placeholder */}
             <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-surface-2)] via-[var(--color-surface)] to-[var(--color-surface-2)] animate-pulse" />
-            
+
             <video
               className="absolute inset-0 w-full h-full object-cover object-top"
               autoPlay
@@ -93,10 +93,10 @@ export function AboutSection() {
             >
               <source src="/content/desktop-video/VIDEO-DESKTOP.mp4" type="video/mp4" />
             </video>
-            
+
             {/* Subtle inner border glow */}
             <div className="absolute inset-0 rounded-3xl border border-white/10 pointer-events-none" />
-            
+
             {/* Subtle gradient overlay for depth */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </motion.div>
