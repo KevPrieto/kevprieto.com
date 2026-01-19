@@ -55,15 +55,15 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <motion.article
-      className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-[var(--space-lg)] flex flex-col overflow-hidden transition-[border-color] duration-300"
+      className="group bg-[var(--color-surface)] border border-white/[0.08] dark:border-white/[0.06] rounded-xl p-[var(--space-lg)] flex flex-col overflow-hidden transition-all duration-300"
       style={{ boxShadow: "var(--shadow-soft)" }}
       whileHover={
         shouldReduceMotion
           ? {}
           : {
-            y: -6,
-            boxShadow: "0 16px 48px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1)",
-            borderColor: "var(--color-accent)",
+            y: -8,
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25), 0 0 40px rgba(59, 130, 246, 0.08)",
+            borderColor: "rgba(255, 255, 255, 0.12)",
             transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
           }
       }

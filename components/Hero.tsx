@@ -58,7 +58,31 @@ export function Hero() {
         }
       `}</style>
 
-      <section className="relative min-h-screen flex flex-col py-[var(--space-xl)] pt-[calc(var(--space-xl)+4rem)]">
+      <section className="relative min-h-screen flex flex-col py-[var(--space-xl)] pt-[calc(var(--space-xl)+4rem)] overflow-hidden">
+        {/* Huly-style atmospheric background glow */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Central light pillar */}
+          <div
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] opacity-40 dark:opacity-60"
+            style={{
+              background: 'radial-gradient(ellipse at center top, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 70%)',
+            }}
+          />
+          {/* Left accent glow */}
+          <div
+            className="absolute -left-32 top-1/4 w-[400px] h-[400px] opacity-20 dark:opacity-30 blur-3xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%)',
+            }}
+          />
+          {/* Right accent glow - warm */}
+          <div
+            className="absolute -right-32 top-1/3 w-[350px] h-[350px] opacity-15 dark:opacity-25 blur-3xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(251, 146, 60, 0.4) 0%, transparent 70%)',
+            }}
+          />
+        </div>
         <Container>
           {/* FloatingCTA - Top Right Corner of Hero Section */}
           <motion.a
