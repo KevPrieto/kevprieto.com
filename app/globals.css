@@ -30,10 +30,30 @@
   --content-width: 72rem;
   --content-padding: 1.5rem;
 
-  /* Animation */
+  /* Line Heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.03em;
+  --letter-spacing-snug: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+
+  /* Animation - Legacy (for backward compat) */
   --animation-duration: 500ms;
   --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
   --animation-distance: 16px;
+
+  /* Motion Tokens - Premium */
+  --motion-duration-fast: 200ms;
+  --motion-duration-default: 400ms;
+  --motion-duration-slow: 700ms;
+  --motion-easing-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-easing-out: cubic-bezier(0, 0, 0.2, 1);
 }
 
 @media (min-width: 768px) {

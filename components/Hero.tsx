@@ -76,11 +76,11 @@ export function Hero() {
               shouldReduceMotion
                 ? {}
                 : {
-                    y: -6,
-                    scale: 1.05,
-                    boxShadow: "0 16px 48px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
-                    transition: { duration: 0.3 },
-                  }
+                  y: -6,
+                  scale: 1.05,
+                  boxShadow: "0 16px 48px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
+                  transition: { duration: 0.3 },
+                }
             }
             whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
             aria-label="Get in touch via Calendly"
@@ -147,7 +147,7 @@ export function Hero() {
               {/* Text Column */}
               <div className="flex-1 order-2 lg:order-1">
                 <Reveal delay={0.1}>
-                  <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-extrabold leading-[0.9] tracking-tighter mb-[var(--space-xl)]">
+                  <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-extrabold leading-[var(--line-height-tight)] tracking-[var(--letter-spacing-tight)] mb-[var(--space-xl)]">
                     <WordReveal delay={0} stagger={0.08}>
                       Building systems.
                     </WordReveal>
@@ -207,16 +207,16 @@ export function Hero() {
                       whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -2 }}
                       whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
                     >
-                    <span className="relative z-10">Download CV</span>
-                    <svg
-                      className="relative z-10 w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                  </motion.a>
+                      <span className="relative z-10">Download CV</span>
+                      <svg
+                        className="relative z-10 w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </motion.a>
                   </div>
                 </Reveal>
               </div>

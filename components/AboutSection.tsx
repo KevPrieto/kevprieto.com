@@ -70,27 +70,35 @@ export function AboutSection() {
           </Reveal>
         </div>
 
-        {/* Vertical Video Column - Editorial Reel Style */}
+        {/* Vertical Video Column - Large, Editorial, Premium */}
         <Reveal delay={0.2}>
           <motion.div
-            className="relative w-[280px] sm:w-[320px] lg:w-[380px] aspect-[9/16] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-3xl overflow-hidden mx-auto lg:mx-0"
+            className="relative w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[520px] aspect-[9/16] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-3xl overflow-hidden mx-auto lg:mx-0 group"
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 40, scale: 0.95 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true }}
-            style={{ boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.15)" }}
+            style={{ boxShadow: "0 24px 80px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.15)" }}
           >
+            {/* Loading skeleton placeholder */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-surface-2)] via-[var(--color-surface)] to-[var(--color-surface-2)] animate-pulse" />
+            
             <video
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-top"
               autoPlay
               loop
               muted
               playsInline
+              preload="metadata"
             >
               <source src="/content/desktop-video/VIDEO-DESKTOP.mp4" type="video/mp4" />
             </video>
+            
             {/* Subtle inner border glow */}
             <div className="absolute inset-0 rounded-3xl border border-white/10 pointer-events-none" />
+            
+            {/* Subtle gradient overlay for depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </motion.div>
         </Reveal>
       </div>

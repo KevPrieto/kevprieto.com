@@ -1,206 +1,155 @@
-# Bug Fixes & Features Tracker
+# TRACKER.md — Kevin Prieto Website Quality Elevation
 
 ## Status Legend
 - [ ] Pending
+- [/] In Progress
 - [x] Completed
 
 ---
 
-## CRITICAL BUGS
+## Phase 1 — Audit & Baseline
 
-### 1. [x] Hero Profile Image Not Visible
-- **File:** `components/Hero.tsx`
-- **Fix:** Use explicit widths `w-[320px] sm:w-[380px] lg:w-[450px]`
+### 1. [x] Analyze current site UX (kevprieto.com)
+- **Date:** Jan 2026
+- **Finding:** Solid functional site with clear sections (Hero, WhatIDo, Projects, Mocion, CurrentlyWorking, Tools, About, Contact)
+- **Gap:** Visual rhythm and perceived polish below premium benchmark
 
-### 2. [x] Download CV Button - White on White (Dark Mode)
-- **File:** `components/Hero.tsx`
-- **Fix:** Change to `bg-[var(--color-accent)] text-white`
+### 2. [x] Analyze information architecture & navigation
+- **Finding:** Good floating capsule nav with 5 items + theme toggle
+- **Gap:** Icon-only nav on mobile; active section indicator missing
 
-### 3. [x] Hydration Error - div inside p
-- **File:** `components/AboutSection.tsx`
-- **Fix:** Change `motion.p` to `motion.div` (lines 17, 52)
+### 3. [x] Evaluate visual hierarchy & layout rhythm
+- **Finding:** Hero uses 55%/45% split, About uses text-left/video-right
+- **Gap:** Section rhythm inconsistent; spacing between blocks feels arbitrary
 
-### 4. [x] FloatingCTA Position - Move to Top Right
-- **File:** `components/FloatingCTA.tsx`
-- **Fix:** Change `bottom-8` to `top-24`
+### 4. [x] Evaluate typography system
+- **Finding:** `--font-size-*` tokens from xs to 6xl, clamp() for responsive
+- **Gap:** Line-heights need more variation; letter-spacing on headlines needs tightening
 
-### 5. [x] YouTube URL Wrong
-- **File:** `components/Hero.tsx`
-- **Fix:** Change `@kevprs` to `@kevprieto`
+### 5. [x] Evaluate spacing system
+- **Finding:** `--space-*` from xs to 3xl, mostly 8pt multiples
+- **Gap:** Some inline spacing uses arbitrary values (e.g., `gap-2`, `gap-0.5`)
 
----
+### 6. [x] Evaluate color system & contrast
+- **Finding:** Light/dark themes with semantic tokens (bg, fg, surface, muted, etc.)
+- **Gap:** Contrast ratios need audit; accent usage sparse
 
-## UI/UX IMPROVEMENTS
+### 7. [x] Evaluate motion system
+- **Finding:** Framer Motion with Reveal, WordReveal, StaggerText primitives
+- **Gap:** Animations basic (fade+up); missing spring physics, scroll parallax
 
-### 6. [x] Social Media Icons Too Small
-- **File:** `components/Hero.tsx`
-- **Fix:** Increase to `w-14 h-14` and `size={28}`
+### 8. [x] Evaluate responsiveness
+- **Finding:** Mobile breakpoints handled; nav adapts to icon-only
+- **Gap:** Video container too small on mobile (280px)
 
-### 7. [x] Glass/Crystal iOS Style Not Visible
-- **Files:** `app/globals.css`, `components/Header.tsx`
-- **Fix:** Enhance blur to 24px, stronger opacity, saturation, inset highlights
+### 9. [ ] Performance baseline (LCP, CLS, INP)
+- **Status:** Pending Lighthouse audit
 
-### 8. [x] Replace Video Placeholder with Actual Video
-- **File:** `components/AboutSection.tsx`
-- **Fix:** Move video to public folder, embed `<video>` element
+### 10. [ ] Accessibility baseline
+- **Status:** Pending keyboard nav + ARIA audit
 
----
-
-## PROGRESS
-
-| # | Task | Status |
-|---|------|--------|
-| 1 | Hero Image | DONE |
-| 2 | CV Button | DONE |
-| 3 | Hydration Error | DONE |
-| 4 | FloatingCTA Position | DONE |
-| 5 | YouTube URL | DONE |
-| 6 | Social Icons Size | DONE |
-| 7 | Glass Effect | DONE |
-| 8 | Video Embed | DONE |
-
-**Completed: 8/8**
+### 11. [x] Verify video asset tracking
+- **Finding:** ✅ Git LFS correctly configured for *.mp4, *.mov
+- **File:** `content/desktop-video/VIDEO-DESKTOP.mp4` tracked
 
 ---
 
-## ITERATION 2 - UI/UX REFINEMENTS (Jan 2026)
+## Phase 2 — Design System Refinement
 
-### 9. [x] Download CV Button - Crystal iOS Gray Glass Style
-- **File:** `components/Hero.tsx`
-- **Issue:** Button uses blue accent color (`bg-[var(--color-accent)]`)
-- **Fix:** Changed to `glass` class with `text-[var(--color-fg)]`, matching navbar style
+### 12. [x] Typography scale & tokens
+- Added `--line-height-tight/snug/normal/relaxed` tokens
+- Added `--letter-spacing-tight/snug/normal/wide` tokens
+- Applied to Hero h1 for premium feel
 
-### 10. [x] Get in Touch Button - Crystal iOS Gray Glass Style
-- **File:** `components/FloatingCTA.tsx`
-- **Issue:** Button uses blue accent color (`bg-[var(--color-accent)]`)
-- **Fix:** Changed to `glass` class with `text-[var(--color-fg)]`, removed blue glow effects
+### 13. [ ] Spacing & layout tokens
+- Standardize all spacing to 8pt/4pt grid
+- Remove arbitrary gaps
 
-### 11. [x] Hero Section Visual Distribution
-- **File:** `components/Hero.tsx`
-- **Issue:** Image column too small (45%), needed more visual presence
-- **Fix:**
-  - Increased column width to 50%
-  - Increased image sizes (500px on desktop)
-  - Added decorative blur background gradient
-  - Added subtle gradient overlay on image
-  - Improved aspect ratio (4/5 on desktop)
-  - Added subtle border for depth
+### 14. [ ] Color tokens & semantic usage
+- Audit contrast ratios
+- Define accent usage patterns
 
-### 12. [x] About Section Visual Distribution
-- **File:** `components/AboutSection.tsx`
-- **Issue:** Video squeezed side-by-side with text
-- **Fix:**
-  - Full-width cinematic video at top (aspect 21:9 / 2.5:1)
-  - Text content reorganized into two-column layout below
-  - Better visual hierarchy with video as hero element
-  - Elevated shadow for more depth
+### 15. [x] Motion standards
+- Added `--motion-duration-fast/default/slow`
+- Added `--motion-easing-smooth/spring/out`
+- Applied to AboutSection and ProjectsSection
 
 ---
 
-## ITERATION 2 PROGRESS
+## Phase 3 — High-Impact Execution
 
-| # | Task | Status |
-|---|------|--------|
-| 9 | Download CV Glass Style | DONE |
-| 10 | Get in Touch Glass Style | DONE |
-| 11 | Hero Visual Layout | DONE |
-| 12 | About Visual Layout | DONE |
+### About / Bio Section
 
-**Completed: 4/4**
+### 16. [x] Redesign About/Bio section layout
+- Increased video container: 360px → 420px → 520px (responsive)
+- Enhanced shadow depth (24px 80px)
+- Added loading skeleton placeholder
 
----
+### 17. [x] Fix video rendering issues (CRITICAL)
+**Acceptance Criteria:**
+- [x] Video appears **large** (520px on desktop, 360px on mobile)
+- [x] Video respects vertical 9:16 orientation
+- [x] No unintended cropping (`object-top` applied)
+- [x] Correct `object-fit: cover` and `object-position: top`
+- [x] No CLS (skeleton placeholder during load)
+- [x] Responsive behavior with `max-w-*` utilities
+- [x] Premium shadow and hover depth effect
 
-## ITERATION 3 - FINAL POLISH (Jan 2026)
-
-### 13. [x] FloatingCTA - Larger Glass Bubble, Top Corner
-- **File:** `components/FloatingCTA.tsx`
-- **Issue:** CTA was too small, felt like footer element
-- **Fix:**
-  - Increased padding: `px-8 py-4`
-  - Larger text: `text-[var(--font-size-base)]`
-  - Position confirmed at top: `top-20 right-6`
-  - Enhanced box-shadow with inset highlights
-  - Added inner glow gradient effect
-  - Stronger hover animation (y: -6, scale: 1.05)
-
-### 14. [x] Hero Profile Image - Significantly Larger
-- **File:** `components/Hero.tsx`
-- **Issue:** Image was too small (500px), didn't balance headline
-- **Fix:**
-  - Column width increased: 50% → 55%
-  - Image sizes drastically increased: `w-[380px] sm:w-[480px] lg:w-[580px] xl:w-[640px]`
-  - Aspect ratio: 3/4 (portrait, editorial)
-  - Quality increased to 95
-  - Larger decorative blur background
-  - Image now matches headline visual weight
-
-### 15. [x] About Video - Vertical 9:16 + Renamed File
-- **File:** `components/AboutSection.tsx`
-- **Issue:** Video was landscape, lost impact, wrong filename
-- **Fix:**
-  - Updated source: `/content/desktop-video/VIDEO-DESKTOP.mp4`
-  - Changed to vertical aspect ratio: `aspect-[9/16]`
-  - Width: `w-[280px] sm:w-[320px] lg:w-[380px]`
-  - Editorial layout: text left, tall video right
-  - Strong elevated shadow for presence
-  - Inner border glow effect
-
-### 16. [x] Copy Video to Public Folder
-- **Source:** `content/desktop-video/VIDEO-DESKTOP.mp4`
-- **Destination:** `public/content/desktop-video/VIDEO-DESKTOP.mp4`
-- **Fix:** Copied video file for Next.js static serving
+### 18. [x] Validate video responsive behavior
+- Desktop: 520px, bold, clear, premium ✓
+- Mobile: 360px, scales gracefully ✓
 
 ---
 
-## ITERATION 3 PROGRESS
+### Global Polish
 
-| # | Task | Status |
-|---|------|--------|
-| 13 | FloatingCTA Larger | DONE |
-| 14 | Hero Image Larger | DONE |
-| 15 | Video Vertical 9:16 | DONE |
-| 16 | Copy Video File | DONE |
+### 19. [ ] Hero refinement
+- Story clarity
+- Visual hierarchy
+- CTA prominence
 
-**Completed: 4/4**
+### 20. [x] Projects presentation upgrade
+- Enhanced hover: y: -6, accent border, premium shadow
+- Premium easing curve (0.16, 1, 0.3, 1)
+- Improved scannability with border color transition
 
----
+### 21. [ ] Microinteractions pass
+- Hover states
+- Focus states
+- Active indicators
 
-## ITERATION 4 - Hero Alignment & CTA Repositioning (Jan 2026)
+### 22. [ ] Mobile-first polish pass
+- Touch targets (44px minimum)
+- Tap feedback
+- Spacing adjustments
 
-### 17. [x] FloatingCTA - Move to Hero Section Top Corner
-- **Files:** `components/Hero.tsx`, `components/ClientLayout.tsx`
-- **Issue:** CTA used `fixed` positioning relative to viewport, not Hero section
-- **Fix:**
-  - Integrated FloatingCTA directly into Hero component (Hero.tsx:64-111)
-  - Changed from `fixed` to `absolute` positioning
-  - Positioned at `top-0 right-0 md:right-6` within Hero Container
-  - Added `relative` to Hero section (line 61)
-  - Removed FloatingCTA import and usage from ClientLayout.tsx
+### 23. [ ] SEO hygiene pass
+- Meta tags
+- Heading structure
+- Alt text audit
 
-### 18. [x] Hero Image - Vertical Alignment with Text
-- **File:** `components/Hero.tsx`
-- **Issue:** Image had fixed aspect ratio, didn't align with text vertically
-- **Fix:**
-  - Changed flex container to `items-start` (line 146)
-  - Added `lg:self-stretch` to image column (line 223)
-  - Removed `aspect-[3/4]` constraint
-  - Changed to `h-full` with `min-h-[500px] lg:min-h-0` (line 234)
-  - Added `object-top` to Image for top alignment (line 239)
-  - Image now spans from headline to Download CV button
-
-### 19. [x] Video File Verification
-- **File:** `components/AboutSection.tsx`
-- **Status:** Video already using correct file `VIDEO-DESKTOP.mp4`
-- **Location:** `public/content/desktop-video/VIDEO-DESKTOP.mp4`
+### 24. [ ] Final performance optimization
+- Image optimization
+- Code splitting
+- Bundle analysis
 
 ---
 
-## ITERATION 4 PROGRESS
+## Git & Large-Asset Safety Checklist
 
-| # | Task | Status |
-|---|------|--------|
-| 17 | FloatingCTA to Hero Section | DONE |
-| 18 | Hero Image Vertical Alignment | DONE |
-| 19 | Video File Verification | DONE |
+Before ANY push:
+```bash
+git remote -v           # Verify correct repository
+git status              # Check for uncommitted changes
+git lfs ls-files        # Confirm video in LFS
+# Ensure: No video >25MB in normal Git
+```
 
-**Completed: 3/3**
+---
+
+## Quality Bar Validation
+
+**Question for every task:**
+> "Would a senior designer or engineer from Linear, Vercel, Stripe, Framer, or Notion respect this website?"
+
+If NO → task is NOT complete.
