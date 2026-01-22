@@ -1,0 +1,61 @@
+# Project Task Tracker
+
+> **Automation System Reference** — Format compatible with n8n workflow
+
+## How to Use
+
+This file is read by the n8n automation system. Follow the format exactly:
+
+- **Tasks** start with `- [ ]` followed by `TASK-ID: Description`
+- **Acceptance criteria** are indented under tasks with `- [ ]`
+- Status markers: `[ ]` pending, `[/]` in progress, `[x]` complete, `[!]` blocked
+
+---
+
+## Current Sprint
+
+### Website Quality Tasks
+
+- [ ] TASK-001: Fix Bio video black borders on mobile
+  - [ ] No black borders visible on iPhone 14 viewport (390x844)
+  - [ ] Video maintains 16:9 aspect ratio on all breakpoints
+  - [ ] CLS < 0.1 on mobile Lighthouse test
+  - [ ] Video loads within 3 seconds on 3G connection
+
+- [ ] TASK-002: Improve hero section performance
+  - [ ] LCP < 2.5s on simulated 3G connection
+  - [ ] No visible layout shift during hero image load
+  - [ ] Performance score > 90 on desktop Lighthouse
+  - [ ] Performance score > 70 on mobile Lighthouse
+
+- [ ] TASK-003: Add responsive navigation
+  - [ ] Mobile hamburger menu works on all pages
+  - [ ] Menu closes on navigation
+  - [ ] No horizontal scroll on mobile
+  - [ ] Desktop navigation visible on screens > 768px
+
+### Completed Tasks
+
+- [x] TASK-000: Initial project setup
+  - [x] Next.js configured
+  - [x] Vercel deployment working
+  - [x] GitHub repo connected
+
+---
+
+## Blocked
+
+*(Tasks waiting on external dependencies)*
+
+<!-- Example:
+- [!] TASK-999: Integrate analytics (BLOCKED: waiting for GTM container ID)
+-->
+
+---
+
+## Notes
+
+- Tasks are processed in order (top to bottom)
+- Only one task runs at a time
+- Failed tasks after max iterations are marked `[!]`
+- Human review pauses automation until approved

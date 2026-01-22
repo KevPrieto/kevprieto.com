@@ -1,0 +1,1125 @@
+{
+    "name": "Website Automation System v2 (Hardened)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "automation/trigger",
+                "responseMode": "onReceived"
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                260,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 4
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-trigger",
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                260,
+                500
+            ],
+            "disabled": true
+        },
+        {
+            "parameters": {
+                "jsCode": "// ========== KILL SWITCH CHECK ==========\nif (process.env.SYSTEM_ENABLED !== 'true') {\n  throw new Error('SYSTEM DISABLED via SYSTEM_ENABLED env var');\n}\n\nconst body = $input.first()?.json?.body || {};\n\nreturn {\n  state: {\n    execution_id: $execution.id,\n    repo: body.repo || process.env.DEFAULT_REPO,\n    repo_owner: (body.repo || process.env.DEFAULT_REPO).split('/')[0],\n    repo_name: (body.repo || process.env.DEFAULT_REPO).split('/')[1],\n    mode: body.mode || 'all-pending',\n    max_iterations: body.max_iterations || parseInt(process.env.MAX_ITERATIONS || '5'),\n    status: 'INITIALIZING',\n    started_at: new Date().toISOString()\n  }\n};"
+            },
+            "id": "initialize-execution",
+            "name": "Initialize Execution",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                480,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "command": "=#!/bin/bash\nset -e\n\nREPO_DIR=\"/data/repos/{{$json.state.repo_name}}\"\nGITHUB_TOKEN=\"${GITHUB_TOKEN}\"\nREPO_URL=\"https://x-access-token:${GITHUB_TOKEN}@github.com/{{$json.state.repo}}.git\"\n\nif [ -d \"$REPO_DIR\" ]; then\n  cd \"$REPO_DIR\"\n  git fetch origin\n  git reset --hard origin/main\n  git clean -fd\nelse\n  git clone \"$REPO_URL\" \"$REPO_DIR\"\n  cd \"$REPO_DIR\"\nfi\n\necho \"REPO_PATH=$REPO_DIR\"\necho \"CURRENT_SHA=$(git rev-parse HEAD)\""
+            },
+            "id": "clone-repo",
+            "name": "Clone/Update Repository",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                700,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "=https://api.github.com/repos/{{$node['Initialize Execution'].json.state.repo}}/contents/TRACKER.md",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth"
+            },
+            "id": "read-tracker",
+            "name": "Read TRACKER.md from GitHub",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                920,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "GITHUB_HEADER_AUTH_CREDENTIAL_ID",
+                    "name": "GitHub Token"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse TRACKER.md content from base64\nconst content = Buffer.from($input.first().json.content, 'base64').toString('utf8');\nconst sha = $input.first().json.sha;\nconst lines = content.split('\\n');\nconst executionId = $('Initialize Execution').first().json.state.execution_id;\n\n// ========== CHECK FOR LOCK ==========\nconst lockMatch = content.match(/^> LOCKED BY: (.+)$/m);\nif (lockMatch && !lockMatch[1].includes(executionId)) {\n  throw new Error(`TRACKER.md is locked by another execution: ${lockMatch[1]}`);\n}\n\nconst tasks = [];\nlet currentTask = null;\n\nconst TASK_REGEX = /^-\\s*\\[([\\sx\\/!])\\]\\s*([A-Z]+-\\d+):\\s*(.+)$/;\nconst CRITERIA_REGEX = /^\\s+-\\s*\\[([\\sx])\\]\\s*(.+)$/;\n\nfor (let i = 0; i < lines.length; i++) {\n  const line = lines[i];\n  \n  const taskMatch = line.match(TASK_REGEX);\n  if (taskMatch) {\n    const [, statusChar, id, description] = taskMatch;\n    const status = {\n      ' ': 'PENDING',\n      '/': 'IN_PROGRESS',\n      'x': 'COMPLETED',\n      '!': 'BLOCKED'\n    }[statusChar];\n    \n    currentTask = {\n      id,\n      description: description.trim(),\n      status,\n      acceptance_criteria: [],\n      line_number: i + 1\n    };\n    tasks.push(currentTask);\n    continue;\n  }\n  \n  const criteriaMatch = line.match(CRITERIA_REGEX);\n  if (criteriaMatch && currentTask) {\n    const [, statusChar, text] = criteriaMatch;\n    currentTask.acceptance_criteria.push({\n      text: text.trim(),\n      met: statusChar === 'x',\n      line_number: i + 1\n    });\n  }\n}\n\n// Find target task based on mode\nconst mode = $('Initialize Execution').first().json.state.mode;\nconst requestedId = $('Webhook Trigger').first()?.json?.body?.task_id;\n\nlet targetTask;\nif (mode === 'single' && requestedId) {\n  targetTask = tasks.find(t => t.id === requestedId);\n} else {\n  targetTask = tasks.find(t => t.status === 'PENDING' || t.status === 'IN_PROGRESS');\n}\n\n// Add lock line to content if task found\nlet lockedContent = content;\nif (targetTask && !lockMatch) {\n  lockedContent = `> LOCKED BY: n8n-run-${executionId}\\n\\n${content}`;\n}\n\nreturn {\n  target_task: targetTask || null,\n  all_tasks: tasks,\n  tracker_content: content,\n  tracker_content_locked: lockedContent,\n  tracker_sha: sha,\n  has_task: !!targetTask\n};"
+            },
+            "id": "parse-tracker",
+            "name": "Parse TRACKER.md",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                1140,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json.has_task}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "check-task-found",
+            "name": "Task Found?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1360,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "status",
+                            "value": "NO_TASKS"
+                        },
+                        {
+                            "name": "message",
+                            "value": "No pending tasks found in TRACKER.md"
+                        }
+                    ]
+                }
+            },
+            "id": "no-task-handler",
+            "name": "No Task Found",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                1580,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ========== LOOP INIT (v2) ==========\n// Separate init from increment for safety\nconst state = $('Initialize Execution').first().json.state;\n\nreturn {\n  iteration: 1,\n  max_iterations: state.max_iterations,\n  history: [],\n  execution_id: state.execution_id,\n  iteration_started_at: new Date().toISOString(),\n  should_continue: true\n};"
+            },
+            "id": "loop-init",
+            "name": "Loop Init",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                1580,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ========== LOOP NEXT ITERATION (v2) ==========\n// Immutable increment - never reuses state unsafely\nconst prev = $input.first().json;\nconst nextIteration = prev.iteration + 1;\nconst maxIterations = prev.max_iterations;\n\n// Get previous results for context\nconst previousResults = $('Evaluate Criteria')?.first()?.json || null;\n\n// Build immutable history\nconst history = [...(prev.history || [])];\nif (previousResults) {\n  history.push({\n    iteration: prev.iteration,\n    criteria_results: previousResults.criteria_results,\n    recommendation: previousResults.recommendation,\n    timestamp: new Date().toISOString()\n  });\n}\n\nconst shouldContinue = nextIteration <= maxIterations;\n\nreturn {\n  iteration: nextIteration,\n  max_iterations: maxIterations,\n  should_continue: shouldContinue,\n  history: history,\n  execution_id: prev.execution_id,\n  iteration_started_at: new Date().toISOString(),\n  previous_results: previousResults\n};"
+            },
+            "id": "loop-next",
+            "name": "Loop Next Iteration",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                5320,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json.should_continue}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "check-should-continue",
+            "name": "Should Continue?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                5540,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "command": "=#!/bin/bash\nset -e\n\nREPO_PATH=\"/data/repos/{{$node['Initialize Execution'].json.state.repo_name}}\"\ncd \"$REPO_PATH\"\n\necho '=== package.json ==='\ncat package.json 2>/dev/null | head -50 || echo 'Not found'\n\necho ''\necho '=== Project Structure ==='\nfind . -type f \\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.css\" \\) | grep -v node_modules | head -30\n\necho ''\necho '=== Recent Commits ==='\ngit log --oneline -5\n\necho ''\necho '=== TRACKER.md ==='\ncat TRACKER.md"
+            },
+            "id": "read-project-context",
+            "name": "Read Project Context",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                1800,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.anthropic.com/v1/messages",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"model\": \"claude-sonnet-4-20250514\",\n  \"max_tokens\": 8000,\n  \"system\": \"You are a senior frontend engineer debugging a Next.js website. You MUST respond with valid JSON only. No markdown outside the JSON structure. Be precise and specific.\\n\\nIMPORTANT: For 'modify' actions, you MUST provide the exact 'before' code snippet to replace. Only set confidence to 'high' if you are very certain of the fix.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"## TASK\\n{{$node['Parse TRACKER.md'].json.target_task.id}}: {{$node['Parse TRACKER.md'].json.target_task.description}}\\n\\n## ACCEPTANCE CRITERIA\\n{{$node['Parse TRACKER.md'].json.target_task.acceptance_criteria.map(c => '- ' + (c.met ? '[x]' : '[ ]') + ' ' + c.text).join('\\\\n')}}\\n\\n## ITERATION {{$json.iteration}} of {{$json.max_iterations}}\\n\\n## PREVIOUS ITERATION RESULTS\\n{{$json.previous_results ? JSON.stringify($json.previous_results, null, 2) : 'None - first iteration'}}\\n\\n## PROJECT CONTEXT\\n{{$node['Read Project Context'].json.stdout}}\\n\\n## INSTRUCTIONS\\nAnalyze the task and provide a concrete fix. Respond with this exact JSON structure:\\n\\n{\\n  \\\"analysis\\\": \\\"Brief analysis of the problem\\\",\\n  \\\"root_cause\\\": \\\"Identified root cause\\\",\\n  \\\"proposed_changes\\\": [\\n    {\\n      \\\"file\\\": \\\"path/to/file.tsx\\\",\\n      \\\"action\\\": \\\"modify|create|delete\\\",\\n      \\\"description\\\": \\\"What change to make\\\",\\n      \\\"before\\\": \\\"EXACT original code snippet (required for modify)\\\",\\n      \\\"after\\\": \\\"New code to use\\\"\\n    }\\n  ],\\n  \\\"verification_notes\\\": \\\"How to verify the fix worked\\\",\\n  \\\"confidence\\\": \\\"high|medium|low\\\",\\n  \\\"needs_human_review\\\": true|false\\n}\"\n    }\n  ]\n}",
+                "timeout": 120000
+            },
+            "id": "claude-analysis",
+            "name": "Claude Analysis",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                2020,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "CLAUDE_API_CREDENTIAL_ID",
+                    "name": "Claude API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Parse Claude's response\nconst response = $input.first().json.content[0].text;\n\ntry {\n  let jsonStr = response;\n  const jsonMatch = response.match(/```json\\s*([\\s\\S]*?)\\s*```/);\n  if (jsonMatch) {\n    jsonStr = jsonMatch[1];\n  }\n  \n  const parsed = JSON.parse(jsonStr);\n  \n  if (!parsed.proposed_changes || !Array.isArray(parsed.proposed_changes)) {\n    return {\n      valid: false,\n      error: 'Missing or invalid proposed_changes array',\n      raw_response: response\n    };\n  }\n  \n  // Validate confidence field\n  if (!['high', 'medium', 'low'].includes(parsed.confidence)) {\n    parsed.confidence = 'low';\n  }\n  \n  return {\n    valid: true,\n    ...parsed\n  };\n} catch (error) {\n  return {\n    valid: false,\n    error: 'Failed to parse Claude response as JSON: ' + error.message,\n    raw_response: response\n  };\n}"
+            },
+            "id": "parse-claude-response",
+            "name": "Parse Claude Response",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                2240,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json.valid}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "validate-response",
+            "name": "Valid Response?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                2460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ========== APPLY CODE CHANGES - SAFE MODE (v2) ==========\n// Prohibits unsafe overwrites unless confidence is high\n\nconst fs = require('fs');\nconst path = require('path');\n\nconst repoPath = '/data/repos/' + $('Initialize Execution').first().json.state.repo_name;\nconst changes = $json.proposed_changes;\nconst confidence = $json.confidence;\n\nconst results = [];\n\nfor (const change of changes) {\n  const filePath = path.join(repoPath, change.file);\n  const dir = path.dirname(filePath);\n  \n  try {\n    if (change.action === 'delete') {\n      if (fs.existsSync(filePath)) {\n        fs.unlinkSync(filePath);\n        results.push({ file: change.file, action: 'DELETED', success: true });\n      } else {\n        results.push({ file: change.file, action: 'SKIP_DELETE', reason: 'not found' });\n      }\n    } else if (change.action === 'create') {\n      fs.mkdirSync(dir, { recursive: true });\n      fs.writeFileSync(filePath, change.after);\n      results.push({ file: change.file, action: 'CREATED', success: true });\n    } else if (change.action === 'modify') {\n      if (!fs.existsSync(filePath)) {\n        results.push({ file: change.file, action: 'FAILED', reason: 'file not found' });\n        continue;\n      }\n      \n      let content = fs.readFileSync(filePath, 'utf8');\n      \n      // SAFE MODE: Only replace if 'before' matches exactly\n      if (change.before && content.includes(change.before)) {\n        content = content.replace(change.before, change.after);\n        fs.writeFileSync(filePath, content);\n        results.push({ file: change.file, action: 'MODIFIED', success: true });\n      } else if (confidence === 'high' && change.after) {\n        // HIGH CONFIDENCE: Allow full file overwrite\n        fs.writeFileSync(filePath, change.after);\n        results.push({ file: change.file, action: 'REPLACED', success: true, warning: 'full overwrite' });\n      } else {\n        // BLOCKED: Unsafe overwrite prevented\n        results.push({ \n          file: change.file, \n          action: 'BLOCKED', \n          reason: 'before content not found and confidence is not high',\n          confidence: confidence\n        });\n      }\n    }\n  } catch (err) {\n    results.push({ file: change.file, action: 'ERROR', error: err.message });\n  }\n}\n\nconst successCount = results.filter(r => r.success).length;\nconst blockedCount = results.filter(r => r.action === 'BLOCKED').length;\n\nreturn {\n  changes_applied: successCount,\n  changes_blocked: blockedCount,\n  results: results,\n  all_success: blockedCount === 0 && results.every(r => r.success || r.action === 'SKIP_DELETE')\n};"
+            },
+            "id": "apply-changes",
+            "name": "Apply Code Changes (Safe)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                2680,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "command": "=#!/bin/bash\nset -e\n\nREPO_PATH=\"/data/repos/{{$node['Initialize Execution'].json.state.repo_name}}\"\ncd \"$REPO_PATH\"\n\nTASK_ID=\"{{$node['Parse TRACKER.md'].json.target_task.id}}\"\nITERATION=\"{{$node['Loop Init'].json.iteration}}\"\n\ngit add -A\n\nif git diff --staged --quiet; then\n  echo \"NO_CHANGES\"\n  exit 0\nfi\n\ngit commit -m \"automation($TASK_ID): iteration $ITERATION fixes\n\nApplied by n8n automation workflow v2\nExecution ID: {{$node['Initialize Execution'].json.state.execution_id}}\"\n\ngit push origin main\n\necho \"COMMITTED\"\necho \"NEW_SHA=$(git rev-parse HEAD)\""
+            },
+            "id": "git-commit",
+            "name": "Git Commit Changes",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                2900,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{$env.VERCEL_DEPLOY_HOOK_URL}}",
+                "sendBody": true,
+                "specifyBody": "keypairs",
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "ref",
+                            "value": "main"
+                        }
+                    ]
+                },
+                "timeout": 30000
+            },
+            "id": "trigger-vercel",
+            "name": "Trigger Vercel Deploy",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                3120,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 60,
+                "unit": "seconds"
+            },
+            "id": "wait-deploy",
+            "name": "Wait for Build",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                3340,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "=https://api.vercel.com/v6/deployments?projectId={{$env.VERCEL_PROJECT_ID}}&limit=1&state=READY",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth"
+            },
+            "id": "get-deployment-url",
+            "name": "Get Deployment URL",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                3560,
+                200
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "VERCEL_API_CREDENTIAL_ID",
+                    "name": "Vercel Token"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "command": "=#!/bin/bash\nset -e\n\nPREVIEW_URL=\"https://{{$json.deployments[0].url}}\"\nTASK_ID=\"{{$node['Parse TRACKER.md'].json.target_task.id}}\"\nITERATION=\"{{$node['Loop Init'].json.iteration}}\"\nSCREENSHOT_DIR=\"/data/screenshots/${TASK_ID}/iter-${ITERATION}\"\n\nmkdir -p \"$SCREENSHOT_DIR\"\n\necho \"Capturing screenshots for $PREVIEW_URL\"\n\nchromium --headless --disable-gpu --screenshot=\"$SCREENSHOT_DIR/desktop.png\" --window-size=1920,1080 \"$PREVIEW_URL\" 2>/dev/null || echo 'Desktop screenshot failed'\nchromium --headless --disable-gpu --screenshot=\"$SCREENSHOT_DIR/mobile.png\" --window-size=390,844 \"$PREVIEW_URL\" 2>/dev/null || echo 'Mobile screenshot failed'\n\necho \"PREVIEW_URL=$PREVIEW_URL\"\necho \"SCREENSHOT_DIR=$SCREENSHOT_DIR\"\necho \"DESKTOP_SCREENSHOT=$SCREENSHOT_DIR/desktop.png\"\necho \"MOBILE_SCREENSHOT=$SCREENSHOT_DIR/mobile.png\"\n\nls -la \"$SCREENSHOT_DIR/\""
+            },
+            "id": "run-screenshots",
+            "name": "Capture Screenshots",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                3780,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "command": "=#!/bin/bash\n# ========== VIDEO GEOMETRY VALIDATION (v2) ==========\n# Detects black borders, underfill, aspect ratio issues\n\nTASK_ID=\"{{$node['Parse TRACKER.md'].json.target_task.id}}\"\nITERATION=\"{{$node['Loop Init'].json.iteration}}\"\nSCREENSHOT_DIR=\"/data/screenshots/${TASK_ID}/iter-${ITERATION}\"\nIMG=\"$SCREENSHOT_DIR/desktop.png\"\n\nif [ ! -f \"$IMG\" ]; then\n  echo '{\"error\": \"Screenshot not found\", \"video_geometry_ok\": false}'\n  exit 0\nfi\n\npython3 << 'EOF' || echo '{\"error\": \"Python validation failed\", \"video_geometry_ok\": false}'\nimport json\nimport sys\n\ntry:\n    from PIL import Image\nexcept ImportError:\n    print(json.dumps({\"error\": \"PIL not installed\", \"video_geometry_ok\": true, \"skipped\": true}))\n    sys.exit(0)\n\nimg_path = \"$IMG\".replace('$IMG', '/data/screenshots/${TASK_ID}/iter-${ITERATION}/desktop.png')\ntry:\n    img = Image.open(img_path).convert('RGB')\nexcept Exception as e:\n    print(json.dumps({\"error\": str(e), \"video_geometry_ok\": true, \"skipped\": true}))\n    sys.exit(0)\n\nw, h = img.size\naspect = w / h\n\nEXPECTED_ASPECT = 16/9\nTOLERANCE = 0.1\n\nblack_pixels = 0\ntotal = w * h\npixels = img.load()\n\nfor x in range(0, w, 10):\n  for y in range(0, h, 10):\n    r, g, b = pixels[x, y]\n    if r < 15 and g < 15 and b < 15:\n      black_pixels += 1\n\nsampled = (w // 10) * (h // 10)\nblack_ratio = black_pixels / sampled if sampled > 0 else 0\n\naspect_ok = abs(aspect - EXPECTED_ASPECT) <= TOLERANCE\nblack_ok = black_ratio < 0.08\n\nresult = {\n  'width': w,\n  'height': h,\n  'aspect_ratio': round(aspect, 3),\n  'aspect_ok': aspect_ok,\n  'black_ratio': round(black_ratio, 4),\n  'black_ok': black_ok,\n  'video_geometry_ok': aspect_ok and black_ok\n}\n\nprint(json.dumps(result))\nEOF"
+            },
+            "id": "validate-video-geometry",
+            "name": "Validate Video Geometry",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                4000,
+                100
+            ]
+        },
+        {
+            "parameters": {
+                "command": "=#!/bin/bash\n\nPREVIEW_URL=\"https://{{$node['Get Deployment URL'].json.deployments[0].url}}\"\nTASK_ID=\"{{$node['Parse TRACKER.md'].json.target_task.id}}\"\nITERATION=\"{{$node['Loop Init'].json.iteration}}\"\nOUTPUT_DIR=\"/data/lighthouse/${TASK_ID}/iter-${ITERATION}\"\n\nmkdir -p \"$OUTPUT_DIR\"\n\necho \"Running Lighthouse for $PREVIEW_URL\"\n\nif command -v lighthouse &> /dev/null; then\n  lighthouse \"$PREVIEW_URL\" \\\n    --output=json \\\n    --output-path=\"$OUTPUT_DIR/report.json\" \\\n    --chrome-flags=\"--headless --no-sandbox\" \\\n    --only-categories=performance,accessibility \\\n    --quiet\n    \n  node << 'EOF'\nconst fs = require('fs');\nconst report = JSON.parse(fs.readFileSync(process.env.OUTPUT_DIR + '/report.json', 'utf8'));\nconsole.log(JSON.stringify({\n  performance_score: Math.round(report.categories.performance.score * 100),\n  accessibility_score: Math.round(report.categories.accessibility.score * 100),\n  cls: report.audits['cumulative-layout-shift']?.numericValue || 0,\n  lcp: report.audits['largest-contentful-paint']?.numericValue || 0,\n  fid: report.audits['max-potential-fid']?.numericValue || 0\n}));\nEOF\nelse\n  echo '{\"performance_score\": null, \"accessibility_score\": null, \"cls\": null, \"lcp\": null, \"note\": \"Lighthouse not installed\"}'\nfi"
+            },
+            "id": "run-lighthouse",
+            "name": "Run Lighthouse",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                4000,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Collect all verification results including video geometry\nconst screenshotOutput = $('Capture Screenshots').first().json.stdout || '';\nconst lighthouseOutput = $('Run Lighthouse').first().json.stdout || '{}';\nconst videoGeometryOutput = $('Validate Video Geometry').first().json.stdout || '{}';\n\n// Parse screenshot paths\nconst desktopMatch = screenshotOutput.match(/DESKTOP_SCREENSHOT=(.+)/);\nconst mobileMatch = screenshotOutput.match(/MOBILE_SCREENSHOT=(.+)/);\nconst previewMatch = screenshotOutput.match(/PREVIEW_URL=(.+)/);\n\n// Parse lighthouse metrics\nlet lighthouse = {};\ntry {\n  const jsonLine = lighthouseOutput.split('\\n').find(l => l.startsWith('{'));\n  if (jsonLine) lighthouse = JSON.parse(jsonLine);\n} catch (e) {\n  lighthouse = { error: 'Failed to parse lighthouse output' };\n}\n\n// Parse video geometry\nlet videoGeometry = {};\ntry {\n  const jsonLine = videoGeometryOutput.split('\\n').find(l => l.startsWith('{'));\n  if (jsonLine) videoGeometry = JSON.parse(jsonLine);\n} catch (e) {\n  videoGeometry = { error: 'Failed to parse video geometry', video_geometry_ok: true };\n}\n\nreturn {\n  verification: {\n    preview_url: previewMatch ? previewMatch[1].trim() : null,\n    screenshots: {\n      desktop: desktopMatch ? desktopMatch[1].trim() : null,\n      mobile: mobileMatch ? mobileMatch[1].trim() : null,\n      captured_at: new Date().toISOString()\n    },\n    lighthouse: lighthouse,\n    video_geometry: videoGeometry\n  },\n  iteration: $('Loop Init').first().json.iteration,\n  max_iterations: $('Loop Init').first().json.max_iterations\n};"
+            },
+            "id": "collect-verification",
+            "name": "Collect Verification Results",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                4220,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// ========== EVALUATE CRITERIA (v2) ==========\n// Now includes video geometry auto-fail\n\nconst task = $('Parse TRACKER.md').first().json.target_task;\nconst verification = $json.verification;\nconst iteration = $json.iteration;\nconst maxIterations = $json.max_iterations;\n\nconst criteriaResults = [];\n\n// Check video geometry first - AUTO FAIL if bad\nconst videoGeo = verification.video_geometry || {};\nif (videoGeo.video_geometry_ok === false) {\n  criteriaResults.push({\n    criterion: '[AUTO] Video geometry validation',\n    expected: true,\n    actual: false,\n    confidence: 'high',\n    evidence: `Black ratio: ${videoGeo.black_ratio}, Aspect: ${videoGeo.aspect_ratio}`,\n    requires_human: false,\n    auto_fail: true\n  });\n}\n\nfor (const criterion of task.acceptance_criteria) {\n  const result = evaluateCriterion(criterion.text, verification);\n  criteriaResults.push({\n    criterion: criterion.text,\n    expected: true,\n    actual: result.passed,\n    confidence: result.confidence,\n    evidence: result.evidence,\n    requires_human: result.requires_human || false\n  });\n}\n\nfunction evaluateCriterion(text, data) {\n  const textLower = text.toLowerCase();\n  \n  // CLS criteria\n  if (textLower.includes('cls') && (textLower.includes('<') || textLower.includes('less'))) {\n    const threshold = parseFloat(text.match(/[\\d.]+/)?.[0] || 0.1);\n    const clsValue = data.lighthouse?.cls;\n    if (clsValue !== null && clsValue !== undefined) {\n      return {\n        passed: clsValue < threshold,\n        confidence: 'high',\n        evidence: `CLS = ${clsValue}, threshold = ${threshold}`\n      };\n    }\n    return { passed: null, confidence: 'none', evidence: 'CLS metric not available' };\n  }\n  \n  // Performance score\n  if (textLower.includes('performance') && textLower.includes('score')) {\n    const threshold = parseInt(text.match(/\\d+/)?.[0] || 80);\n    const score = data.lighthouse?.performance_score;\n    if (score !== null && score !== undefined) {\n      return {\n        passed: score >= threshold,\n        confidence: 'high',\n        evidence: `Performance = ${score}, threshold = ${threshold}`\n      };\n    }\n    return { passed: null, confidence: 'none', evidence: 'Performance score not available' };\n  }\n  \n  // Screenshot exists\n  if (textLower.includes('screenshot')) {\n    const hasDesktop = !!data.screenshots?.desktop;\n    const hasMobile = !!data.screenshots?.mobile;\n    return {\n      passed: hasDesktop && hasMobile,\n      confidence: 'high',\n      evidence: `Desktop: ${hasDesktop ? 'captured' : 'missing'}, Mobile: ${hasMobile ? 'captured' : 'missing'}`\n    };\n  }\n  \n  // Video/black border - NOW AUTO-EVALUATED via video geometry\n  if (textLower.includes('video') || textLower.includes('black border')) {\n    const videoGeo = data.video_geometry || {};\n    if (videoGeo.video_geometry_ok !== undefined) {\n      return {\n        passed: videoGeo.video_geometry_ok,\n        confidence: 'medium',\n        evidence: `Auto-detected: black_ratio=${videoGeo.black_ratio}, aspect=${videoGeo.aspect_ratio}`\n      };\n    }\n    return {\n      passed: null,\n      confidence: 'low',\n      evidence: 'Video geometry check skipped, requires human',\n      requires_human: true\n    };\n  }\n  \n  return {\n    passed: null,\n    confidence: 'none',\n    evidence: 'Criterion requires manual verification',\n    requires_human: true\n  };\n}\n\nconst autoFailCriteria = criteriaResults.filter(r => r.auto_fail === true);\nconst passedCriteria = criteriaResults.filter(r => r.actual === true);\nconst failedCriteria = criteriaResults.filter(r => r.actual === false);\nconst humanReviewCriteria = criteriaResults.filter(r => r.requires_human && r.actual === null);\n\n// AUTO FAIL takes priority - immediate retry without human\nconst hasAutoFail = autoFailCriteria.length > 0;\nconst allAutoPassed = failedCriteria.length === 0 && passedCriteria.length === criteriaResults.length;\nconst anyFailed = failedCriteria.length > 0;\nconst requiresHuman = humanReviewCriteria.length > 0 && !hasAutoFail;\n\nlet recommendation;\nif (hasAutoFail && iteration < maxIterations) {\n  recommendation = 'RETRY';  // Auto-fail forces retry, no human needed\n} else if (allAutoPassed && !requiresHuman) {\n  recommendation = 'COMPLETE';\n} else if (anyFailed && iteration < maxIterations) {\n  recommendation = 'RETRY';\n} else if (requiresHuman) {\n  recommendation = 'HUMAN_REVIEW';\n} else if (iteration >= maxIterations) {\n  recommendation = 'MAX_ITERATIONS';\n} else {\n  recommendation = 'RETRY';\n}\n\nreturn {\n  criteria_results: criteriaResults,\n  summary: {\n    passed: passedCriteria.length,\n    failed: failedCriteria.length,\n    auto_fail: autoFailCriteria.length,\n    needs_human: humanReviewCriteria.length,\n    total: criteriaResults.length\n  },\n  all_criteria_met: allAutoPassed && !requiresHuman,\n  any_failed: anyFailed,\n  has_auto_fail: hasAutoFail,\n  requires_human_verification: requiresHuman,\n  recommendation,\n  iteration,\n  max_iterations: maxIterations,\n  verification\n};"
+            },
+            "id": "evaluate-criteria",
+            "name": "Evaluate Criteria",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                4440,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "mode": "rules",
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.recommendation}}",
+                                        "operation": "equals",
+                                        "value2": "COMPLETE"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.recommendation}}",
+                                        "operation": "equals",
+                                        "value2": "RETRY"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.recommendation}}",
+                                        "operation": "equals",
+                                        "value2": "HUMAN_REVIEW"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.recommendation}}",
+                                        "operation": "equals",
+                                        "value2": "MAX_ITERATIONS"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "decision-switch",
+            "name": "What Next?",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 2,
+            "position": [
+                4660,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "resume": "webhook",
+                "webhookSuffix": "={{$node['Initialize Execution'].json.state.execution_id}}"
+            },
+            "id": "human-approval",
+            "name": "Wait for Human Approval",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                4880,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{$env.SLACK_WEBHOOK_URL}}",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"blocks\": [\n    {\"type\": \"header\", \"text\": {\"type\": \"plain_text\", \"text\": \"🔍 Human Review Required\"}},\n    {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Task:* {{$node['Parse TRACKER.md'].json.target_task.id}}\\n*Description:* {{$node['Parse TRACKER.md'].json.target_task.description}}\\n*Iteration:* {{$node['Loop Init'].json.iteration}} of {{$node['Loop Init'].json.max_iterations}}\"}},\n    {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Preview URL:* {{$json.verification.preview_url}}\"}},\n    {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Criteria needing review:*\\n{{$json.criteria_results.filter(c => c.requires_human).map(c => '• ' + c.criterion).join('\\\\n')}}\"}},\n    {\"type\": \"actions\", \"elements\": [\n      {\"type\": \"button\", \"text\": {\"type\": \"plain_text\", \"text\": \"✅ Approve\"}, \"style\": \"primary\", \"url\": \"{{$node['Wait for Human Approval'].json.resumeUrl}}?action=approve\"},\n      {\"type\": \"button\", \"text\": {\"type\": \"plain_text\", \"text\": \"🔄 Retry\"}, \"url\": \"{{$node['Wait for Human Approval'].json.resumeUrl}}?action=retry\"},\n      {\"type\": \"button\", \"text\": {\"type\": \"plain_text\", \"text\": \"⛔ Block\"}, \"style\": \"danger\", \"url\": \"{{$node['Wait for Human Approval'].json.resumeUrl}}?action=block\"}\n    ]}\n  ]\n}"
+            },
+            "id": "notify-slack",
+            "name": "Notify Slack",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                4880,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "mode": "rules",
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.query.action}}",
+                                        "operation": "equals",
+                                        "value2": "approve"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.query.action}}",
+                                        "operation": "equals",
+                                        "value2": "retry"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "conditions": [
+                                    {
+                                        "value1": "={{$json.query.action}}",
+                                        "operation": "equals",
+                                        "value2": "block"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "id": "process-human-response",
+            "name": "Process Human Response",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 2,
+            "position": [
+                5100,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Prepare complete update - also removes lock\nconst task = $('Parse TRACKER.md').first().json.target_task;\nconst content = $('Parse TRACKER.md').first().json.tracker_content;\nconst sha = $('Parse TRACKER.md').first().json.tracker_sha;\nconst repo = $('Initialize Execution').first().json.state.repo;\nconst executionId = $('Initialize Execution').first().json.state.execution_id;\n\n// Remove lock and mark complete\nlet updatedContent = content\n  .replace(/^> LOCKED BY: .+\\n\\n?/m, '')\n  .replace(new RegExp(`^(-\\\\s*)\\\\[[\\\\s\\\\/]\\\\](\\\\s*${task.id}:)`, 'm'), '$1[x]$2');\n\n// Mark criteria complete\nconst taskSection = updatedContent.match(new RegExp(`^-\\\\s*\\\\[x\\\\]\\\\s*${task.id}:[^\\\\n]*\\\\n((?:\\\\s+-[^\\\\n]*\\\\n)*)`, 'm'));\nif (taskSection) {\n  const criteriaSection = taskSection[1];\n  const updatedCriteria = criteriaSection.replace(/\\[ \\]/g, '[x]');\n  updatedContent = updatedContent.replace(criteriaSection, updatedCriteria);\n}\n\nreturn {\n  repo, sha,\n  updated_content: updatedContent,\n  updated_content_base64: Buffer.from(updatedContent).toString('base64'),\n  task_id: task.id,\n  commit_message: `automation(${task.id}): marked complete\\n\\nCompleted by n8n automation v2\\nExecution ID: ${executionId}`\n};"
+            },
+            "id": "prepare-complete-update",
+            "name": "Prepare Complete Update",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                4880,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "method": "PUT",
+                "url": "=https://api.github.com/repos/{{$json.repo}}/contents/TRACKER.md",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"message\": \"{{$json.commit_message}}\",\n  \"content\": \"{{$json.updated_content_base64}}\",\n  \"sha\": \"{{$json.sha}}\"\n}"
+            },
+            "id": "commit-complete",
+            "name": "Commit Task Complete",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                5100,
+                0
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "GITHUB_HEADER_AUTH_CREDENTIAL_ID",
+                    "name": "GitHub Token"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Prepare blocked update - also removes lock\nconst task = $('Parse TRACKER.md').first().json.target_task;\nconst content = $('Parse TRACKER.md').first().json.tracker_content;\nconst sha = $('Parse TRACKER.md').first().json.tracker_sha;\nconst repo = $('Initialize Execution').first().json.state.repo;\nconst iteration = $('Loop Init').first().json.iteration;\nconst executionId = $('Initialize Execution').first().json.state.execution_id;\n\nconst updatedContent = content\n  .replace(/^> LOCKED BY: .+\\n\\n?/m, '')\n  .replace(new RegExp(`^(-\\\\s*)\\\\[[\\\\s\\\\/]\\\\](\\\\s*${task.id}:)`, 'm'), `$1[!]$2 (BLOCKED after ${iteration} iterations)`);\n\nreturn {\n  repo, sha,\n  updated_content: updatedContent,\n  updated_content_base64: Buffer.from(updatedContent).toString('base64'),\n  task_id: task.id,\n  commit_message: `automation(${task.id}): marked BLOCKED\\n\\nMax iterations (${iteration}) reached\\nExecution ID: ${executionId}`\n};"
+            },
+            "id": "prepare-blocked-update",
+            "name": "Prepare Blocked Update",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                4880,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "method": "PUT",
+                "url": "=https://api.github.com/repos/{{$json.repo}}/contents/TRACKER.md",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"message\": \"{{$json.commit_message}}\",\n  \"content\": \"{{$json.updated_content_base64}}\",\n  \"sha\": \"{{$json.sha}}\"\n}"
+            },
+            "id": "commit-blocked",
+            "name": "Commit Task Blocked",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                5100,
+                600
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "GITHUB_HEADER_AUTH_CREDENTIAL_ID",
+                    "name": "GitHub Token"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "final_status",
+                            "value": "COMPLETED"
+                        },
+                        {
+                            "name": "task_id",
+                            "value": "={{$node['Parse TRACKER.md'].json.target_task.id}}"
+                        }
+                    ],
+                    "number": [
+                        {
+                            "name": "total_iterations",
+                            "value": "={{$node['Loop Init'].json.iteration}}"
+                        }
+                    ]
+                }
+            },
+            "id": "success-report",
+            "name": "Success Report",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                5320,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "final_status",
+                            "value": "BLOCKED"
+                        },
+                        {
+                            "name": "task_id",
+                            "value": "={{$node['Parse TRACKER.md'].json.target_task.id}}"
+                        },
+                        {
+                            "name": "reason",
+                            "value": "Max iterations reached"
+                        }
+                    ]
+                }
+            },
+            "id": "blocked-report",
+            "name": "Blocked Report",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3,
+            "position": [
+                5760,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "errorMessage": "={{$json.error}}"
+            },
+            "id": "claude-error",
+            "name": "Claude Parse Error",
+            "type": "n8n-nodes-base.stopAndError",
+            "typeVersion": 1,
+            "position": [
+                2680,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Initialize Execution",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Initialize Execution",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Initialize Execution": {
+            "main": [
+                [
+                    {
+                        "node": "Clone/Update Repository",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Clone/Update Repository": {
+            "main": [
+                [
+                    {
+                        "node": "Read TRACKER.md from GitHub",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read TRACKER.md from GitHub": {
+            "main": [
+                [
+                    {
+                        "node": "Parse TRACKER.md",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse TRACKER.md": {
+            "main": [
+                [
+                    {
+                        "node": "Task Found?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Task Found?": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Init",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "No Task Found",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Init": {
+            "main": [
+                [
+                    {
+                        "node": "Read Project Context",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Project Context": {
+            "main": [
+                [
+                    {
+                        "node": "Claude Analysis",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Claude Analysis": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Claude Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Claude Response": {
+            "main": [
+                [
+                    {
+                        "node": "Valid Response?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Valid Response?": {
+            "main": [
+                [
+                    {
+                        "node": "Apply Code Changes (Safe)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Claude Parse Error",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Apply Code Changes (Safe)": {
+            "main": [
+                [
+                    {
+                        "node": "Git Commit Changes",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Git Commit Changes": {
+            "main": [
+                [
+                    {
+                        "node": "Trigger Vercel Deploy",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Trigger Vercel Deploy": {
+            "main": [
+                [
+                    {
+                        "node": "Wait for Build",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait for Build": {
+            "main": [
+                [
+                    {
+                        "node": "Get Deployment URL",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Deployment URL": {
+            "main": [
+                [
+                    {
+                        "node": "Capture Screenshots",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Capture Screenshots": {
+            "main": [
+                [
+                    {
+                        "node": "Validate Video Geometry",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Run Lighthouse",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate Video Geometry": {
+            "main": [
+                [
+                    {
+                        "node": "Collect Verification Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Run Lighthouse": {
+            "main": [
+                [
+                    {
+                        "node": "Collect Verification Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Collect Verification Results": {
+            "main": [
+                [
+                    {
+                        "node": "Evaluate Criteria",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evaluate Criteria": {
+            "main": [
+                [
+                    {
+                        "node": "What Next?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "What Next?": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Complete Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Loop Next Iteration",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Notify Slack",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Prepare Blocked Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Next Iteration": {
+            "main": [
+                [
+                    {
+                        "node": "Should Continue?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Should Continue?": {
+            "main": [
+                [
+                    {
+                        "node": "Read Project Context",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Prepare Blocked Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Notify Slack": {
+            "main": [
+                [
+                    {
+                        "node": "Wait for Human Approval",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait for Human Approval": {
+            "main": [
+                [
+                    {
+                        "node": "Process Human Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Process Human Response": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Complete Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Loop Next Iteration",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Prepare Blocked Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Complete Update": {
+            "main": [
+                [
+                    {
+                        "node": "Commit Task Complete",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Commit Task Complete": {
+            "main": [
+                [
+                    {
+                        "node": "Success Report",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Blocked Update": {
+            "main": [
+                [
+                    {
+                        "node": "Commit Task Blocked",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Commit Task Blocked": {
+            "main": [
+                [
+                    {
+                        "node": "Blocked Report",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveManualExecutions": true,
+        "callerPolicy": "workflowsFromSameOwner"
+    }
+}

@@ -1,0 +1,146 @@
+version: '3.8'
+
+# ============================================
+# n8n Automation System - Docker Compose
+# ============================================
+# Full stack for website automation workflow
+# ============================================
+
+services:
+  # ============================================
+  # n8n - Workflow Orchestration
+  # ============================================
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      # Authentication
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      
+      # Server config
+      - N8N_HOST=${N8N_HOST:-0.0.0.0}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      
+      # Timezone
+      - GENERIC_TIMEZONE=UTC
+      
+      # Production mode
+      - NODE_ENV=production
+      
+      # Execution settings
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+
+      # Enable risky nodes (required for executeCommand node)
+      - N8N_COMMUNITY_PACKAGES_ENABLED=true
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - EXECUTIONS_PROCESS=main
+      
+      # External service credentials (passed to workflows)
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - VERCEL_TOKEN=${VERCEL_TOKEN}
+      - VERCEL_PROJECT_ID=${VERCEL_PROJECT_ID}
+      - VERCEL_DEPLOY_HOOK_URL=${VERCEL_DEPLOY_HOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - DEFAULT_REPO=${DEFAULT_REPO}
+      - MAX_ITERATIONS=${MAX_ITERATIONS:-5}
+      
+    volumes:
+      # n8n data (workflows, credentials, execution history)
+      - n8n_data:/home/node/.n8n
+      
+      # Shared data volumes
+      - ./repos:/data/repos
+      - ./screenshots:/data/screenshots
+      - ./lighthouse:/data/lighthouse
+      - ./logs:/data/logs
+      
+    networks:
+      - automation-net
+      
+    depends_on:
+      redis:
+        condition: service_healthy
+        
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Resource limits (adjust based on VPS specs)
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  # ============================================
+  # Redis - Queue Management & Caching
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy volatile-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - automation-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================
+  # Playwright - Screenshot & Testing (Optional)
+  # ============================================
+  # Uncomment to use containerized Playwright instead of host Chromium
+  # playwright:
+  #   image: mcr.microsoft.com/playwright:v1.40.0-jammy
+  #   container_name: playwright
+  #   restart: unless-stopped
+  #   working_dir: /app
+  #   volumes:
+  #     - ./verification:/app
+  #     - ./screenshots:/data/screenshots
+  #   networks:
+  #     - automation-net
+  #   command: ["tail", "-f", "/dev/null"]
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 2G
+
+# ============================================
+# Persistent Volumes
+# ============================================
+volumes:
+  n8n_data:
+    name: n8n_automation_data
+  redis_data:
+    name: n8n_redis_data
+
+# ============================================
+# Network
+# ============================================
+networks:
+  automation-net:
+    name: automation-network
+    driver: bridge

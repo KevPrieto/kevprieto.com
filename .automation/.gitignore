@@ -1,0 +1,20 @@
+# Automation System - Git Ignore
+# Do NOT commit these files
+
+# Environment files with secrets
+.env
+.env.local
+.env.production
+
+# n8n data (contains credentials)
+n8n_data/
+
+# Generated artifacts
+repos/
+screenshots/
+lighthouse/
+logs/
+
+# System files
+*.log
+.DS_Store
