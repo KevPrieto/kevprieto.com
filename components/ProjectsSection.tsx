@@ -29,6 +29,16 @@ const eyla: Project = {
 const secondaryProjects: Project[] = [
   {
     id: 2,
+    title: "AuthFlow",
+    description:
+      "Production-grade backend for SaaS authentication, authorization (RBAC), multi-tenant organizations, and audit logging. Built as a modular monolith with clean architecture, migrations, and containerized runtime.",
+    image: "/images/authflow.png",
+    imageType: "icon",
+    tags: ["Backend", "Auth", "RBAC", "Multi-tenant", "PostgreSQL"],
+    githubUrl: "https://github.com/KevPrieto/Authflow",
+  },
+  {
+    id: 3,
     title: "Flight Fare Optimizer",
     description:
       "Java 17 desktop application for flight search, filtering, and price ranking. Includes modular architecture, stream-based business logic, PDF report generation, and unit-tested core services separated from the UI layer.",
@@ -38,7 +48,7 @@ const secondaryProjects: Project[] = [
     githubUrl: "https://github.com/KevPrieto/Flight-Fare-Optimizer",
   },
   {
-    id: 3,
+    id: 4,
     title: "EYLA Mobile",
     description:
       "Mobile extension of EYLA focused on cross-platform delivery. Built with React Native and TypeScript, designed to integrate with the core system while preserving the same principles of clarity, intent, and long-term orientation.",
@@ -48,7 +58,7 @@ const secondaryProjects: Project[] = [
     githubUrl: "https://github.com/KevPrieto/eyla-mobile",
   },
   {
-    id: 4,
+    id: 5,
     title: "n8n Automation Server",
     description:
       "Self-hosted n8n instance deployed on a VPS to orchestrate automations, integrations, and backend workflows. Focused on reliability, security, and extensibility for production-ready automation pipelines.",
