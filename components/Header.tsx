@@ -7,6 +7,7 @@ import {
   ProjectsIcon,
   ToolsIcon,
   AboutIcon,
+  AwardsIcon,
   ContactIcon,
   SunIcon,
   MoonIcon,
@@ -17,6 +18,7 @@ const navItems = [
   { href: "#projects", label: "Projects", icon: ProjectsIcon },
   { href: "#tools", label: "Tools", icon: ToolsIcon },
   { href: "#about", label: "About", icon: AboutIcon },
+  { href: "#awards", label: "Awards", icon: AwardsIcon },
   { href: "#contact", label: "Contact", icon: ContactIcon },
 ];
 

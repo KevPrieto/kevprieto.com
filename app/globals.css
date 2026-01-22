@@ -75,10 +75,10 @@
   --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
   --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.6);
   --color-accent-text: #ffffff;
-  /* Atmospheric glow colors (Huly-style) */
-  --glow-blue: rgba(59, 130, 246, 0.15);
-  --glow-orange: rgba(251, 146, 60, 0.12);
-  --glow-purple: rgba(139, 92, 246, 0.1);
+  /* Atmospheric glow colors - neutral palette */
+  --glow-cool: rgba(180, 180, 190, 0.12);
+  --glow-warm: rgba(220, 200, 180, 0.1);
+  --glow-neutral: rgba(255, 255, 255, 0.08);
 }
 
 /* Light Theme (iOS-style) */
@@ -110,9 +110,9 @@
     --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.5);
     --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.6);
     --color-accent-text: #ffffff;
-    --glow-blue: rgba(59, 130, 246, 0.15);
-    --glow-orange: rgba(251, 146, 60, 0.12);
-    --glow-purple: rgba(139, 92, 246, 0.1);
+    --glow-cool: rgba(180, 180, 190, 0.12);
+    --glow-warm: rgba(220, 200, 180, 0.1);
+    --glow-neutral: rgba(255, 255, 255, 0.08);
   }
 }
 
@@ -182,8 +182,8 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+  border-color: var(--color-muted-light);
+  box-shadow: 0 0 0 3px rgba(160, 160, 170, 0.2);
 }
 
 input::placeholder,

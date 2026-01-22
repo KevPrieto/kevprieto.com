@@ -94,6 +94,21 @@ export function ContactIcon({ size = 20, className, ...props }: IconProps) {
   );
 }
 
+export function AwardsIcon({ size = 20, className, ...props }: IconProps) {
+  return (
+    <svg
+      {...defaultStrokeProps}
+      width={size}
+      height={size}
+      className={className}
+      {...props}
+    >
+      <circle cx="12" cy="8" r="6" />
+      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+    </svg>
+  );
+}
+
 // ============================================================
 // SOCIAL ICONS (fill-based)
 // ============================================================

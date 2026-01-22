@@ -5,6 +5,7 @@ import { MocionSection } from "@/components/MocionSection";
 import { CurrentlyWorkingSection } from "@/components/CurrentlyWorkingSection";
 import { ToolsSection } from "@/components/ToolsSection";
 import { AboutSection } from "@/components/AboutSection";
+import { AwardsSection } from "@/components/AwardsSection";
 import { ContactSection } from "@/components/ContactSection";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
       <CurrentlyWorkingSection />
       <ToolsSection />
       <AboutSection />
+      <AwardsSection />
       <ContactSection />
     </main>
   );

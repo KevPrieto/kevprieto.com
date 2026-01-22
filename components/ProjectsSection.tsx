@@ -47,6 +47,15 @@ const secondaryProjects: Project[] = [
     tags: ["React Native", "TypeScript", "Mobile"],
     githubUrl: "https://github.com/KevPrieto/eyla-mobile",
   },
+  {
+    id: 4,
+    title: "n8n Automation Server",
+    description:
+      "Self-hosted n8n instance deployed on a VPS to orchestrate automations, integrations, and backend workflows. Focused on reliability, security, and extensibility for production-ready automation pipelines.",
+    image: "/images/n8n-server.png",
+    imageType: "icon",
+    tags: ["n8n", "VPS", "Automation", "Backend"],
+  },
 ];
 
 function ProjectCard({ project }: { project: Project }) {
@@ -55,40 +64,38 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <motion.article
-      className="group bg-[var(--color-surface)] border border-white/[0.08] dark:border-white/[0.06] rounded-xl p-[var(--space-lg)] flex flex-col overflow-hidden transition-all duration-300"
+      className="group relative bg-[var(--color-surface)] border border-white/[0.08] dark:border-white/[0.06] rounded-xl p-[var(--space-lg)] flex flex-col overflow-hidden transition-all duration-400"
       style={{ boxShadow: "var(--shadow-soft)" }}
       whileHover={
         shouldReduceMotion
           ? {}
           : {
-            y: -8,
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25), 0 0 40px rgba(59, 130, 246, 0.08)",
-            borderColor: "rgba(255, 255, 255, 0.12)",
-            transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+            y: -6,
+            boxShadow: "0 24px 64px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.1)",
+            borderColor: "rgba(255, 255, 255, 0.15)",
+            transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
           }
       }
     >
-      {/* Project visual */}
-      <motion.div
-        className={`mb-[var(--space-md)] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] overflow-hidden
+      {/* Premium light sweep effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out pointer-events-none" />
+      {/* Project visual - subtle zoom on hover */}
+      <div
+        className={`relative mb-[var(--space-md)] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] overflow-hidden
           ${isBanner ? "aspect-video" : "aspect-square flex items-center justify-center"}
         `}
-        whileHover={
-          shouldReduceMotion
-            ? {}
-            : { scale: 1.02, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } }
-        }
       >
         <img
           src={project.image}
           alt={`${project.title} preview`}
-          className={
+          className={`transition-transform duration-500 ease-out group-hover:scale-[1.03] ${
             isBanner
               ? "w-full h-full object-cover"
               : "w-full h-full object-contain p-4"
-          }
+          }`}
         />
-      </motion.div>
+      </div>
 
       <h3 className="text-[var(--font-size-xl)] font-bold mb-[var(--space-xs)]">
         <WordReveal stagger={0.05} delay={0.1}>

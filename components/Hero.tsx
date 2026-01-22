@@ -59,37 +59,37 @@ export function Hero() {
       `}</style>
 
       <section className="relative min-h-screen flex flex-col py-[var(--space-xl)] pt-[calc(var(--space-xl)+4rem)] overflow-hidden">
-        {/* Huly-style atmospheric background glow */}
+        {/* Atmospheric background glow - neutral palette */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Central light pillar */}
+          {/* Central light pillar - neutral warm */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] opacity-40 dark:opacity-60"
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[800px] opacity-30 dark:opacity-50"
             style={{
-              background: 'radial-gradient(ellipse at center top, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.15) 40%, transparent 70%)',
+              background: 'radial-gradient(ellipse at center top, rgba(255, 255, 255, 0.15) 0%, rgba(200, 200, 200, 0.08) 40%, transparent 70%)',
             }}
           />
-          {/* Left accent glow */}
+          {/* Left accent glow - cool neutral */}
           <div
-            className="absolute -left-32 top-1/4 w-[400px] h-[400px] opacity-20 dark:opacity-30 blur-3xl"
+            className="absolute -left-32 top-1/4 w-[400px] h-[400px] opacity-15 dark:opacity-20 blur-3xl"
             style={{
-              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(180, 180, 190, 0.3) 0%, transparent 70%)',
             }}
           />
-          {/* Right accent glow - warm */}
+          {/* Right accent glow - warm neutral */}
           <div
-            className="absolute -right-32 top-1/3 w-[350px] h-[350px] opacity-15 dark:opacity-25 blur-3xl"
+            className="absolute -right-32 top-1/3 w-[350px] h-[350px] opacity-12 dark:opacity-18 blur-3xl"
             style={{
-              background: 'radial-gradient(circle, rgba(251, 146, 60, 0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(220, 200, 180, 0.25) 0%, transparent 70%)',
             }}
           />
         </div>
         <Container>
-          {/* FloatingCTA - Top Right Corner of Hero Section */}
+          {/* Floating CTA - Fixed, Top Right Corner, Premium Crystal Bubble */}
           <motion.a
             href="https://calendly.com/kgps1003/30min"
             target="_blank"
             rel="noopener noreferrer"
-            className="glass absolute top-20 right-4 sm:right-6 md:top-6 md:right-6 lg:top-0 lg:right-8 z-40 group px-6 py-3 sm:px-8 sm:py-4 rounded-full text-[var(--color-fg)] font-semibold text-[0.875rem] sm:text-[var(--font-size-base)] inline-flex items-center gap-2 sm:gap-3 overflow-hidden transition-all duration-300"
+            className="glass fixed top-4 right-4 sm:top-5 sm:right-6 md:top-6 md:right-8 z-50 group px-6 py-3 sm:px-8 sm:py-4 rounded-full text-[var(--color-fg)] font-semibold text-[0.875rem] sm:text-[var(--font-size-base)] inline-flex items-center gap-2 sm:gap-3 overflow-hidden transition-all duration-300"
             style={{
               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
             }}
@@ -245,30 +245,35 @@ export function Hero() {
                 </Reveal>
               </div>
 
-              {/* Image Column - Editorial, Dominant, Aligned with Text */}
-              <div className="w-full lg:w-[55%] order-1 lg:order-2 flex justify-center lg:justify-end lg:self-stretch">
+              {/* Image Column - Editorial, Dominant, Magazine-Cover Feel */}
+              <div className="w-full lg:w-[58%] xl:w-[60%] order-1 lg:order-2 flex justify-center lg:justify-end lg:self-stretch">
                 <motion.div
-                  className="relative w-full h-full max-w-[380px] sm:max-w-[480px] lg:max-w-[580px] xl:max-w-[640px]"
+                  className="relative w-full h-full max-w-[400px] sm:max-w-[520px] lg:max-w-[620px] xl:max-w-[700px]"
                   initial={{ opacity: 1 }}
                   animate={{ opacity: 1 }}
-                  whileHover={shouldReduceMotion ? {} : { scale: 1.01, transition: { duration: 0.5 } }}
+                  whileHover={shouldReduceMotion ? {} : { scale: 1.008, transition: { duration: 0.6 } }}
                 >
-                  {/* Decorative blur background - larger and more prominent */}
-                  <div className="absolute -inset-12 bg-gradient-to-br from-[var(--color-surface-2)]/40 via-transparent to-[var(--color-surface-2)]/20 rounded-[4rem] blur-3xl opacity-70" />
+                  {/* Atmospheric glow - neutral, premium */}
+                  <div
+                    className="absolute -inset-16 rounded-[5rem] blur-3xl opacity-50 dark:opacity-70 -z-10"
+                    style={{
+                      background: 'radial-gradient(ellipse at center, rgba(200, 200, 200, 0.12) 0%, transparent 70%)',
+                    }}
+                  />
 
-                  {/* Large editorial image - Stretches to match text column height */}
-                  <div className="relative w-full h-full min-h-[500px] lg:min-h-0 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border border-[var(--color-border)]/20">
+                  {/* Large editorial image - Dominant visual pillar */}
+                  <div className="relative w-full h-full min-h-[520px] lg:min-h-0 overflow-hidden rounded-[2.5rem] sm:rounded-[3rem] border border-[var(--color-border)]/15">
                     <Image
                       src="/content/profile-pic/image00100.jpeg"
                       alt="Kevin Prieto"
                       fill
                       className="object-cover object-top"
                       priority
-                      sizes="(max-width: 640px) 380px, (max-width: 1024px) 480px, (max-width: 1280px) 580px, 640px"
+                      sizes="(max-width: 640px) 400px, (max-width: 1024px) 520px, (max-width: 1280px) 620px, 700px"
                       quality={95}
                     />
                     {/* Subtle gradient overlay for depth */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/15 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/12 via-transparent to-transparent" />
                   </div>
                 </motion.div>
               </div>

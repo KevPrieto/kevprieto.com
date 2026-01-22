@@ -6,11 +6,13 @@ interface StatCardProps {
 
 export function StatCard({ value, label }: StatCardProps) {
   return (
-    <div className="glass rounded-xl px-4 sm:px-[var(--space-md)] py-2 sm:py-[var(--space-sm)] inline-flex flex-col hover-scale">
-      <span className="text-[1.5rem] sm:text-[var(--font-size-2xl)] font-bold leading-none text-[var(--color-fg)]">
+    <div className="group relative glass rounded-xl px-4 sm:px-[var(--space-md)] py-2 sm:py-[var(--space-sm)] inline-flex flex-col overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
+      {/* Light sweep on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-600 ease-out pointer-events-none" />
+      <span className="relative text-[1.5rem] sm:text-[var(--font-size-2xl)] font-bold leading-none text-[var(--color-fg)]">
         {value}
       </span>
-      <span className="text-[0.875rem] sm:text-[var(--font-size-sm)] mt-1 text-[var(--color-muted-light)]">
+      <span className="relative text-[0.875rem] sm:text-[var(--font-size-sm)] mt-1 text-[var(--color-muted-light)]">
         {label}
       </span>
     </div>
