@@ -224,7 +224,9 @@
 - **Description:** Production-grade backend for SaaS authentication, authorization (RBAC), multi-tenant organizations, and audit logging. Built as a modular monolith with clean architecture, migrations, and containerized runtime.
 - **Tags:** Backend, Auth, RBAC, Multi-tenant, PostgreSQL
 - **GitHub:** https://github.com/KevPrieto/Authflow
-- **Note:** Image placeholder needed at `/images/authflow.png`
+- [x] Created temporary placeholder image (`authflow.png`)
+- [x] Created SVG reference design (`authflow-reference.svg`)
+- **TODO:** Replace `authflow.png` with actual logo (use SVG template or original images)
 
 ### 38. [x] Fix floating CTA responsive positioning
 - [x] Adjusted "Get in touch" button positioning on mobile
