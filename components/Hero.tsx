@@ -18,14 +18,10 @@ const socialLinks = [
 ];
 
 const greetings = [
-  "Bienvenido, soy Kevin",
   "Welcome, I'm Kevin",
-  "Hola, soy Kevin",
-  "Ciao, sono Kevin",
-  "Olá, sou Kevin",
-  "Bonjour, je suis Kevin",
-  "안녕하세요, 저는 Kevin입니다",
-  "ようこそ、ケビンです",
+  "Hello, I'm Kevin",
+  "Hey there, I'm Kevin",
+  "Nice to meet you, I'm Kevin",
 ];
 
 export function Hero() {
