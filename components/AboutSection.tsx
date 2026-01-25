@@ -16,8 +16,8 @@ export function AboutSection() {
 
         {/* Row 1: Text + Video side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-[var(--space-lg)] lg:gap-[var(--space-xl)] items-start">
-          {/* Text Content Column */}
-          <div className="space-y-[var(--space-md)] lg:max-w-[560px]">
+          {/* Text Content Column — Premium glass panel for legibility */}
+          <div className="space-y-[var(--space-md)] lg:max-w-[560px] flex flex-col p-6 sm:p-8 rounded-3xl bg-[var(--color-surface)]/60 backdrop-blur-xl border border-[var(--color-border)]/20 shadow-lg">
             <Reveal delay={0.1}>
               <motion.div
                 className="text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.2] font-medium"
@@ -40,9 +40,7 @@ export function AboutSection() {
                 transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                 viewport={{ once: true }}
               >
-                My background is backend development, but my work goes beyond code:
-                I develop games, design interactive experiences, and explore how systems
-                behave when pushed to their limits.
+                My focus is backend development — building systems that are deliberate, maintainable, and built to last. I also create content exploring AI, the future of programming, and what it means to build software that shapes how we work and think.
               </motion.p>
             </Reveal>
 
@@ -54,8 +52,7 @@ export function AboutSection() {
                 transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 viewport={{ once: true }}
               >
-                I also create content where I share tools, workflows, and technical ideas
-                across platforms like LinkedIn, Instagram, and YouTube.
+                Beyond code, I think about movement, mental health, and sustainable growth. In a world obsessed with productivity, I'm learning to build systems that make space for rest, reflection, and the long game.
               </motion.p>
             </Reveal>
 
@@ -68,9 +65,47 @@ export function AboutSection() {
                 viewport={{ once: true }}
               >
                 <WordReveal stagger={0.05} delay={0}>
-                  Curiosity drives everything I build.
+                  This is my journey, and I share it as I go.
                 </WordReveal>
               </motion.div>
+            </Reveal>
+
+            {/* CTA Button */}
+            <Reveal delay={0.5}>
+              <motion.a
+                href="https://www.instagram.com/kevprs/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass mt-[var(--space-lg)] inline-flex items-center gap-2 px-6 py-3 rounded-full text-[var(--color-fg)] text-[var(--font-size-sm)] font-medium self-start transition-all duration-300 group"
+                style={{
+                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                }}
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={
+                  shouldReduceMotion
+                    ? {}
+                    : {
+                        y: -4,
+                        scale: 1.05,
+                        boxShadow: "0 12px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                        transition: { duration: 0.3, ease: [0.34, 1.56, 0.64, 1] },
+                      }
+                }
+                whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
+                transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                viewport={{ once: true }}
+              >
+                <span className="relative z-10">Get to know me</span>
+                <svg
+                  className="w-4 h-4 relative z-10 transition-transform duration-200 group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </motion.a>
             </Reveal>
           </div>
 
@@ -99,7 +134,7 @@ export function AboutSection() {
                   loop
                   muted
                   playsInline
-                  preload="auto"
+                  preload="metadata"
                 >
                   <source src="/content/desktop-video/VIDEO-DESKTOP.mp4" type="video/mp4" />
                 </video>

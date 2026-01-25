@@ -130,7 +130,7 @@ function ProjectCard({ project }: { project: Project }) {
               : "object-contain p-4"
           }`}
           sizes="(max-width: 640px) calc(100vw - 3rem), (max-width: 768px) calc(50vw - 2rem), 400px"
-          quality={90}
+          quality={75}
         />
       </div>
 

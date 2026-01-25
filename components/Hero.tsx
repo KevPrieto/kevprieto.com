@@ -169,26 +169,26 @@ export function Hero() {
           <div className="flex-1 flex items-center">
             <div className="w-full flex flex-col lg:flex-row items-start gap-[var(--space-3xl)]">
               {/* Text Column */}
-              <div className="flex-1 order-2 lg:order-1">
+              <div className="flex-1 order-2 lg:order-1 flex flex-col justify-center">
                 <Reveal delay={0.1}>
-                  <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-extrabold leading-[var(--line-height-tight)] tracking-[var(--letter-spacing-tight)] mb-[var(--space-xl)]">
+                  <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-extrabold leading-[1.15] tracking-[var(--letter-spacing-tight)] mb-[var(--space-lg)] overflow-visible">
                     <WordReveal delay={0} stagger={0.08}>
-                      Building systems.
+                      I build systems.
                     </WordReveal>
                     <br />
                     <WordReveal delay={0.3} stagger={0.08}>
-                      Driving direction.
+                      And I think a lot about where they're taking us.
                     </WordReveal>
                   </h1>
                 </Reveal>
                 <Reveal delay={0.2}>
-                  <p className="text-[clamp(1.25rem,2.5vw,1.75rem)] text-[var(--color-muted-light)] leading-relaxed max-w-[28rem] mb-[var(--space-xl)]">
+                  <p className="text-[clamp(1.25rem,2.5vw,1.75rem)] text-[var(--color-muted-light)] leading-[1.6] max-w-[28rem] mb-[var(--space-lg)]">
                     Software engineer focused on backend systems, web applications, and automation. I ship working products.
                   </p>
                 </Reveal>
 
                 {/* Stats Row */}
-                <StaggerContainer staggerDelay={0.1} className="flex flex-wrap gap-[var(--space-sm)] mb-[var(--space-xl)]">
+                <StaggerContainer staggerDelay={0.1} className="flex flex-wrap gap-[var(--space-sm)] mb-[var(--space-md)]">
                   <StaggerItem>
                     <StatCard value="+4" label="Projects" variant="primary" />
                   </StaggerItem>
@@ -201,7 +201,7 @@ export function Hero() {
                 </StaggerContainer>
 
                 {/* Social Icons */}
-                <StaggerContainer staggerDelay={0.08} className="flex items-center gap-3 sm:gap-5 mb-[var(--space-xl)] justify-center lg:justify-start">
+                <StaggerContainer staggerDelay={0.08} className="flex items-center gap-3 sm:gap-5 mb-[var(--space-md)] justify-center lg:justify-start">
                   {socialLinks.map((link, index) => {
                     const Icon = link.icon;
                     return (
@@ -246,9 +246,9 @@ export function Hero() {
               </div>
 
               {/* Image Column - Editorial, Dominant, Magazine-Cover Feel */}
-              <div className="w-full lg:w-[58%] xl:w-[60%] order-1 lg:order-2 flex justify-center lg:justify-end lg:self-stretch">
+              <div className="w-full lg:w-[58%] xl:w-[60%] order-1 lg:order-2 flex justify-center lg:justify-end">
                 <motion.div
-                  className="relative w-full h-full max-w-[400px] sm:max-w-[520px] lg:max-w-[620px] xl:max-w-[700px] group"
+                  className="relative w-full max-w-[400px] sm:max-w-[520px] lg:max-w-[620px] xl:max-w-[700px] group"
                   initial={{ opacity: 1 }}
                   animate={{ opacity: 1 }}
                   whileHover={shouldReduceMotion ? {} : { scale: 1.08, y: -8, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
@@ -261,16 +261,18 @@ export function Hero() {
                     }}
                   />
 
-                  {/* Large editorial image - Dominant visual pillar */}
-                  <div className="relative w-full h-full min-h-[520px] lg:min-h-0 overflow-hidden rounded-[2.5rem] sm:rounded-[3rem] border border-[var(--color-border)]/15">
+                  {/* Large editorial image - Dominant visual pillar with proper 2:3 aspect ratio */}
+                  <div className="relative w-full aspect-[2/3] overflow-hidden rounded-[2.5rem] sm:rounded-[3rem] border border-[var(--color-border)]/15">
                     <Image
                       src="/content/profile-pic/image00100.jpeg"
                       alt="Kevin Prieto"
                       fill
-                      className="object-cover object-top"
+                      className="object-cover object-[center_20%]"
                       priority
                       sizes="(max-width: 640px) 400px, (max-width: 1024px) 520px, (max-width: 1280px) 620px, 700px"
-                      quality={95}
+                      quality={80}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                     />
                     {/* Subtle gradient overlay for depth */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/12 via-transparent to-transparent" />

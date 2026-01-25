@@ -43,7 +43,7 @@ export function AwardsSection() {
                   fill
                   className="object-cover transition-transform duration-600 ease-out group-hover:scale-[1.10]"
                   sizes="(max-width: 640px) calc(100vw - 3rem), (max-width: 1024px) 90vw, 480px"
-                  quality={90}
+                  quality={75}
                 />
               </div>
 
@@ -118,7 +118,7 @@ export function AwardsSection() {
               fill
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.12]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1100px"
-              quality={90}
+              quality={75}
               priority={false}
             />
             {/* Border on hover */}
