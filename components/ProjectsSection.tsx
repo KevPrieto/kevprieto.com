@@ -27,7 +27,6 @@ const vera: Project = {
   imageType: "banner",
   tags: ["Full-Stack", "Ecommerce", "Next.js", "Stripe", "Supabase"],
   externalUrl: "https://ecommerce.kevprieto.com",
-  video: "/videos/vera.mp4",
 };
 
 const eyla: Project = {
